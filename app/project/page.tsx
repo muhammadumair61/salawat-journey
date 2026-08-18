@@ -171,7 +171,9 @@ function ProjectContent() {
 
     if (entryError) {
       console.error(entryError);
-      setError("Unable to load Salawat entries.");
+      setError(
+        "Unable to load Salawat entries."
+      );
       setLoading(false);
       return;
     }
@@ -323,6 +325,103 @@ function ProjectContent() {
           0
         )
       : 0;
+
+  /* PROJECT GOAL STATUS */
+
+  const progressStatus =
+    useMemo(() => {
+      if (percentage >= 100) {
+        return {
+          icon: "🎉",
+          title: "Alhamdulillah!",
+          text: "Project Goal Reached",
+        };
+      }
+
+      if (percentage >= 75) {
+        return {
+          icon: "🚀",
+          title: "Almost There",
+          text: "The finish line is close!",
+        };
+      }
+
+      if (percentage >= 50) {
+        return {
+          icon: "⭐",
+          title: "Halfway & Growing",
+          text: "Keep the momentum going!",
+        };
+      }
+
+      if (percentage >= 25) {
+        return {
+          icon: "🔥",
+          title: "Building Momentum",
+          text: "The community is growing strong.",
+        };
+      }
+
+      if (percentage >= 10) {
+        return {
+          icon: "🌿",
+          title: "Great Start",
+          text: "Every Salawat is moving us forward.",
+        };
+      }
+
+      return {
+        icon: "🌱",
+        title: "Journey Begins",
+        text: "Every Salawat counts.",
+      };
+    }, [percentage]);
+
+  const nextProjectMilestone =
+    useMemo(() => {
+      if (!project) {
+        return null;
+      }
+
+      const goal =
+        Number(project.goal);
+
+      const milestonePercents = [
+        25,
+        50,
+        75,
+        100,
+      ];
+
+      const nextPercent =
+        milestonePercents.find(
+          (milestone) =>
+            percentage < milestone
+        );
+
+      if (!nextPercent) {
+        return null;
+      }
+
+      const milestoneAmount =
+        Math.round(
+          goal *
+            (nextPercent / 100)
+        );
+
+      return {
+        percent: nextPercent,
+        amount: milestoneAmount,
+        remaining: Math.max(
+          milestoneAmount - total,
+          0
+        ),
+      };
+    }, [
+      project,
+      percentage,
+      total,
+    ]);
 
   const participantTotals =
     useMemo<ParticipantTotal[]>(() => {
@@ -600,20 +699,38 @@ function ProjectContent() {
         ];
       }
 
+      /*
+       * If the project exceeds its goal,
+       * the completed ring stays at 100%.
+       */
+      const goal =
+        Number(project.goal);
+
+      const chartCompleted =
+        Math.min(
+          total,
+          goal
+        );
+
+      const chartRemaining =
+        Math.max(
+          goal - total,
+          0
+        );
+
       return [
         {
           name: "Completed",
-          value: total,
+          value: chartCompleted,
         },
         {
           name: "Remaining",
-          value: remaining,
+          value: chartRemaining,
         },
       ];
     }, [
       project,
       total,
-      remaining,
     ]);
 
   const milestones =
@@ -772,9 +889,11 @@ function ProjectContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
+
         <p className="font-medium text-[#174c3c]">
           Loading Salawat project...
         </p>
+
       </main>
     );
   }
@@ -879,9 +998,11 @@ function ProjectContent() {
         <div className="mb-7 text-center">
 
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
+
             <span className="text-3xl text-white">
               ﷺ
             </span>
+
           </div>
 
           <h1 className="text-3xl font-bold text-[#174c3c]">
@@ -894,34 +1015,64 @@ function ProjectContent() {
           </p>
 
           <p className="mt-2 text-sm text-gray-500">
+
             Project ID:{" "}
+
             <span className="font-semibold text-[#174c3c]">
               {project.project_code}
             </span>
+
           </p>
 
         </div>
 
-        {/* PROJECT GOAL */}
+        {/* ENHANCED PROJECT GOAL */}
 
-        <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-sm">
+        <div
+          className={`mb-5 overflow-hidden rounded-3xl border bg-white p-6 shadow-sm ${
+            percentage >= 100
+              ? "border-[#d8bf68]"
+              : "border-[#e5ded0]"
+          }`}
+        >
+
+          {/* GOAL HEADER */}
 
           <div className="text-center">
 
-            <p className="text-sm text-gray-500">
-              Project Goal
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">
+              Community Goal
             </p>
 
-            <p className="mt-1 text-xl font-semibold text-gray-900">
-              {Number(
-                project.goal
-              ).toLocaleString()}{" "}
+            <h2 className="mt-2 text-2xl font-bold text-[#174c3c]">
+              Project Goal
+            </h2>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Together toward{" "}
+              <span className="font-semibold text-gray-800">
+                {Number(
+                  project.goal
+                ).toLocaleString()}
+              </span>{" "}
               Salawat
             </p>
 
           </div>
 
-          <div className="relative mx-auto mt-5 h-56 w-56">
+          {/* DONUT */}
+
+          <div className="relative mx-auto mt-4 h-72 w-72 max-w-full">
+
+            {/* SOFT OUTER GLOW */}
+
+            <div
+              className={`absolute inset-[30px] rounded-full blur-2xl ${
+                percentage >= 100
+                  ? "bg-[#e9d78a]/25"
+                  : "bg-[#174c3c]/10"
+              }`}
+            />
 
             <ResponsiveContainer
               width="100%"
@@ -938,19 +1089,28 @@ function ProjectContent() {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={72}
-                  outerRadius={96}
+                  innerRadius={88}
+                  outerRadius={116}
                   startAngle={90}
                   endAngle={-270}
                   stroke="none"
+                  cornerRadius={10}
+                  paddingAngle={1}
+                  isAnimationActive={true}
+                  animationDuration={1200}
+                  animationBegin={100}
                 >
 
                   <Cell
-                    fill="#174c3c"
+                    fill={
+                      percentage >= 100
+                        ? "#b58a2a"
+                        : "#174c3c"
+                    }
                   />
 
                   <Cell
-                    fill="#e5e7eb"
+                    fill="#edf0ec"
                   />
 
                 </Pie>
@@ -959,42 +1119,275 @@ function ProjectContent() {
 
             </ResponsiveContainer>
 
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+            {/* CENTER CONTENT */}
 
-              <p className="text-4xl font-bold text-[#174c3c]">
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+
+              {/* WATERMARK */}
+
+              <span className="absolute text-8xl text-[#174c3c]/[0.035]">
+                ﷺ
+              </span>
+
+              {percentage >= 100 && (
+
+                <div className="mb-1 text-2xl">
+                  🎉
+                </div>
+
+              )}
+
+              <p
+                className={`relative text-5xl font-black ${
+                  percentage >= 100
+                    ? "text-[#9a741e]"
+                    : "text-[#174c3c]"
+                }`}
+              >
                 {percentage.toFixed(0)}%
               </p>
 
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="relative mt-1 text-sm font-medium text-gray-500">
                 Complete
               </p>
+
+              <div className="relative mt-3 rounded-full bg-[#f7f3e9] px-4 py-1.5">
+
+                <span className="text-sm font-bold text-gray-800">
+                  {total.toLocaleString()}
+                </span>
+
+                <span className="ml-1 text-xs text-gray-500">
+                  Salawat
+                </span>
+
+              </div>
 
             </div>
 
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          {/* DYNAMIC MESSAGE */}
 
-            <div className="rounded-2xl bg-[#f7f3e9] p-4 text-center">
+          <div
+            className={`mx-auto -mt-1 max-w-sm rounded-2xl px-5 py-4 text-center ${
+              percentage >= 100
+                ? "bg-[#fff7dc]"
+                : "bg-[#f4f8f6]"
+            }`}
+          >
 
-              <p className="text-xs text-gray-500">
+            <p className="text-2xl">
+              {progressStatus.icon}
+            </p>
+
+            <p
+              className={`mt-1 text-lg font-bold ${
+                percentage >= 100
+                  ? "text-[#8b691d]"
+                  : "text-[#174c3c]"
+              }`}
+            >
+              {progressStatus.title}
+            </p>
+
+            <p className="mt-1 text-sm text-gray-500">
+              {progressStatus.text}
+            </p>
+
+          </div>
+
+          {/* NEXT MILESTONE */}
+
+          {nextProjectMilestone ? (
+
+            <div className="mt-5 text-center">
+
+              <p className="text-sm text-gray-500">
+                Next milestone
+              </p>
+
+              <p className="mt-1 font-semibold text-[#174c3c]">
+
+                {nextProjectMilestone.remaining.toLocaleString()}{" "}
+                more Salawat to reach{" "}
+
+                <span className="font-bold">
+                  {nextProjectMilestone.percent}%
+                </span>
+
+              </p>
+
+            </div>
+
+          ) : (
+
+            <div className="mt-5 rounded-2xl bg-[#fff7dc] px-4 py-3 text-center">
+
+              <p className="font-bold text-[#8b691d]">
+                🎉 Alhamdulillah! The project goal has been reached.
+              </p>
+
+              {total >
+                Number(project.goal) && (
+
+                <p className="mt-1 text-sm text-[#8b7b46]">
+
+                  {(
+                    total -
+                    Number(
+                      project.goal
+                    )
+                  ).toLocaleString()}{" "}
+                  Salawat beyond the original goal.
+
+                </p>
+
+              )}
+
+            </div>
+
+          )}
+
+          {/* MILESTONE TRACK */}
+
+          <div className="mt-7">
+
+            <div className="relative">
+
+              {/* BACKGROUND TRACK */}
+
+              <div className="absolute left-5 right-5 top-4 h-1 rounded-full bg-gray-200" />
+
+              {/* ACTIVE TRACK */}
+
+              <div
+                className="absolute left-5 top-4 h-1 rounded-full bg-[#174c3c] transition-all duration-1000"
+                style={{
+                  width: `calc(${Math.min(
+                    percentage,
+                    100
+                  )}% - ${Math.min(
+                    percentage,
+                    100
+                  ) * 0.4}px)`,
+                  maxWidth:
+                    "calc(100% - 40px)",
+                }}
+              />
+
+              <div className="relative grid grid-cols-4">
+
+                {[25, 50, 75, 100].map(
+                  (milestone) => {
+
+                    const reached =
+                      percentage >= milestone;
+
+                    const next =
+                      nextProjectMilestone?.percent ===
+                      milestone;
+
+                    return (
+                      <div
+                        key={
+                          milestone
+                        }
+                        className="flex flex-col items-center"
+                      >
+
+                        <div
+                          className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full border-2 text-xs font-bold transition-all ${
+                            reached
+                              ? "border-[#174c3c] bg-[#174c3c] text-white shadow-sm"
+                              : next
+                              ? "border-[#174c3c] bg-white text-[#174c3c] shadow-sm"
+                              : "border-gray-300 bg-white text-gray-400"
+                          }`}
+                        >
+
+                          {reached
+                            ? "✓"
+                            : milestone}
+
+                        </div>
+
+                        <p
+                          className={`mt-2 text-xs font-semibold ${
+                            reached ||
+                            next
+                              ? "text-[#174c3c]"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {milestone}%
+                        </p>
+
+                        {next && (
+
+                          <span className="mt-1 rounded-full bg-[#eaf7f0] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#174c3c]">
+                            Next
+                          </span>
+
+                        )}
+
+                      </div>
+                    );
+                  }
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* GOAL STATS */}
+
+          <div className="mt-7 grid grid-cols-3 gap-2">
+
+            {/* COMPLETED */}
+
+            <div className="rounded-2xl bg-[#eaf7f0] p-3 text-center sm:p-4">
+
+              <p className="text-[11px] font-medium text-[#56806b] sm:text-xs">
                 Completed
               </p>
 
-              <p className="mt-1 text-xl font-bold text-[#174c3c]">
+              <p className="mt-1 text-base font-bold text-[#174c3c] sm:text-xl">
                 {total.toLocaleString()}
               </p>
 
             </div>
 
-            <div className="rounded-2xl bg-[#f7f3e9] p-4 text-center">
+            {/* REMAINING */}
 
-              <p className="text-xs text-gray-500">
+            <div className="rounded-2xl bg-[#fff7dc] p-3 text-center sm:p-4">
+
+              <p className="text-[11px] font-medium text-[#8b7b46] sm:text-xs">
                 Remaining
               </p>
 
-              <p className="mt-1 text-xl font-bold text-gray-900">
+              <p className="mt-1 text-base font-bold text-[#7a6115] sm:text-xl">
                 {remaining.toLocaleString()}
+              </p>
+
+            </div>
+
+            {/* NEXT */}
+
+            <div className="rounded-2xl bg-[#edf5fb] p-3 text-center sm:p-4">
+
+              <p className="text-[11px] font-medium text-[#628197] sm:text-xs">
+                Next Milestone
+              </p>
+
+              <p className="mt-1 text-base font-bold text-[#265575] sm:text-xl">
+
+                {nextProjectMilestone
+                  ? `${nextProjectMilestone.percent}%`
+                  : "Done ✓"}
+
               </p>
 
             </div>
@@ -1054,11 +1447,9 @@ function ProjectContent() {
 
         </div>
 
-        {/* COLOR PERSONAL SUMMARY */}
+        {/* PERSONAL SUMMARY */}
 
         <div className="mb-5 grid gap-3 sm:grid-cols-3">
-
-          {/* TODAY */}
 
           <div className="rounded-2xl border border-[#cfe9db] bg-[#eaf7f0] p-5 shadow-sm">
 
@@ -1084,8 +1475,6 @@ function ProjectContent() {
 
           </div>
 
-          {/* LAST 7 DAYS */}
-
           <div className="rounded-2xl border border-[#eadba6] bg-[#fff7dc] p-5 shadow-sm">
 
             <div className="flex items-center justify-between">
@@ -1109,8 +1498,6 @@ function ProjectContent() {
             </p>
 
           </div>
-
-          {/* TOTAL */}
 
           <div className="rounded-2xl border border-[#cfddea] bg-[#edf5fb] p-5 shadow-sm">
 
@@ -1277,15 +1664,19 @@ function ProjectContent() {
           />
 
           {error && (
+
             <p className="mt-3 text-sm text-red-600">
               {error}
             </p>
+
           )}
 
           {success && (
+
             <p className="mt-3 text-sm font-medium text-green-700">
               ✓ {success}
             </p>
+
           )}
 
           <button
@@ -1515,7 +1906,7 @@ function ProjectContent() {
 
         </div>
 
-        {/* YOUR OVERALL JOURNEY */}
+        {/* PERSONAL OVERALL JOURNEY */}
 
         <div className="mb-5 rounded-3xl border border-[#cfddea] bg-white p-6 shadow-sm">
 
@@ -1708,8 +2099,6 @@ function ProjectContent() {
 
             <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
 
-              {/* HEADER */}
-
               <div className="flex items-start justify-between gap-4">
 
                 <div>
@@ -1800,7 +2189,8 @@ function ProjectContent() {
 
               {/* PODIUM */}
 
-              {participantTotals.length > 0 && (
+              {participantTotals.length >
+                0 && (
 
                 <div className="mt-7">
 
@@ -1809,6 +2199,8 @@ function ProjectContent() {
                   </p>
 
                   <div className="grid grid-cols-3 items-end gap-2">
+
+                    {/* SECOND */}
 
                     <div className="text-center">
 
@@ -1824,14 +2216,18 @@ function ProjectContent() {
                         </p>
 
                         <p className="mt-1 text-sm font-bold text-[#174c3c]">
+
                           {participantTotals[1]
                             ? participantTotals[1].total.toLocaleString()
                             : "—"}
+
                         </p>
 
                       </div>
 
                     </div>
+
+                    {/* FIRST */}
 
                     <div className="text-center">
 
@@ -1847,14 +2243,18 @@ function ProjectContent() {
                         </p>
 
                         <p className="mt-1 text-lg font-bold">
+
                           {participantTotals[0]
                             ? participantTotals[0].total.toLocaleString()
                             : "—"}
+
                         </p>
 
                       </div>
 
                     </div>
+
+                    {/* THIRD */}
 
                     <div className="text-center">
 
@@ -1870,9 +2270,11 @@ function ProjectContent() {
                         </p>
 
                         <p className="mt-1 text-sm font-bold text-[#174c3c]">
+
                           {participantTotals[2]
                             ? participantTotals[2].total.toLocaleString()
                             : "—"}
+
                         </p>
 
                       </div>
@@ -1885,9 +2287,10 @@ function ProjectContent() {
 
               )}
 
-              {/* VERTICAL CONTRIBUTION CHART */}
+              {/* CONTRIBUTION CHART */}
 
-              {scorecardChartData.length > 0 && (
+              {scorecardChartData.length >
+                0 && (
 
                 <div className="mt-7 rounded-3xl border border-[#e5ded0] p-5">
 
@@ -1986,11 +2389,14 @@ function ProjectContent() {
                   </h3>
 
                   <span className="text-xs text-gray-400">
+
                     {participantTotals.length}{" "}
                     participant
-                    {participantTotals.length === 1
+                    {participantTotals.length ===
+                    1
                       ? ""
                       : "s"}
+
                   </span>
 
                 </div>
@@ -2048,17 +2454,22 @@ function ProjectContent() {
                               <div className="min-w-0">
 
                                 <p className="truncate font-semibold text-gray-900">
+
                                   {participant.name}
+
                                   {isMe
                                     ? " (You)"
                                     : ""}
+
                                 </p>
 
                                 <p className="mt-1 text-xs text-gray-500">
+
                                   {participantPercentage.toFixed(
                                     1
                                   )}
                                   % of project total
+
                                 </p>
 
                               </div>
