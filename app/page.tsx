@@ -69,8 +69,13 @@ function HomeContent() {
         return;
       }
 
-      setProjectId(cleanProjectId);
-      setCheckingSharedProject(true);
+      setProjectId(
+        cleanProjectId
+      );
+
+      setCheckingSharedProject(
+        true
+      );
 
       const {
         data,
@@ -86,10 +91,14 @@ function HomeContent() {
         )
         .maybeSingle();
 
-      setCheckingSharedProject(false);
+      setCheckingSharedProject(
+        false
+      );
 
       if (projectError) {
-        console.error(projectError);
+        console.error(
+          projectError
+        );
 
         setError(
           "Unable to load the shared project."
@@ -110,7 +119,9 @@ function HomeContent() {
         data.project_name
       );
 
-      setSharedProjectFound(true);
+      setSharedProjectFound(
+        true
+      );
     }
 
     loadSharedProject();
@@ -145,7 +156,9 @@ function HomeContent() {
       return;
     }
 
-    setLoading(true);
+    setLoading(
+      true
+    );
 
     const {
       data,
@@ -161,10 +174,14 @@ function HomeContent() {
       )
       .maybeSingle();
 
-    setLoading(false);
+    setLoading(
+      false
+    );
 
     if (projectError) {
-      console.error(projectError);
+      console.error(
+        projectError
+      );
 
       setError(
         "Unable to connect. Please try again."
@@ -207,7 +224,9 @@ function HomeContent() {
       return;
     }
 
-    setSharing(true);
+    setSharing(
+      true
+    );
 
     const {
       data,
@@ -223,10 +242,14 @@ function HomeContent() {
       )
       .maybeSingle();
 
-    setSharing(false);
+    setSharing(
+      false
+    );
 
     if (projectError) {
-      console.error(projectError);
+      console.error(
+        projectError
+      );
 
       setError(
         "Unable to find the project."
@@ -253,11 +276,15 @@ function HomeContent() {
         projectLink
       );
 
-      setCopied(true);
+      setCopied(
+        true
+      );
 
       window.setTimeout(
         () => {
-          setCopied(false);
+          setCopied(
+            false
+          );
         },
         2500
       );
@@ -277,11 +304,25 @@ function HomeContent() {
   function joinDifferentProject() {
     router.push("/");
 
-    setSharedProjectFound(false);
-    setProjectName("");
-    setProjectId("");
-    setName("");
-    setError("");
+    setSharedProjectFound(
+      false
+    );
+
+    setProjectName(
+      ""
+    );
+
+    setProjectId(
+      ""
+    );
+
+    setName(
+      ""
+    );
+
+    setError(
+      ""
+    );
   }
 
   return (
@@ -290,15 +331,19 @@ function HomeContent() {
       {/* HOW TO USE - TOP RIGHT */}
 
       <div className="absolute right-5 top-5 sm:right-8 sm:top-7">
+
         <button
           type="button"
           onClick={() =>
-            setShowHelp(true)
+            setShowHelp(
+              true
+            )
           }
           className="rounded-full border border-[#174c3c] bg-white px-4 py-2 text-sm font-semibold text-[#174c3c] shadow-sm transition hover:bg-[#eef6f2]"
         >
-          How to Use ?
+          ? How to Use
         </button>
+
       </div>
 
       <div className="mx-auto w-full max-w-md pt-14 sm:pt-10">
@@ -315,9 +360,11 @@ function HomeContent() {
           </p>
 
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#174c3c] shadow-md">
+
             <span className="text-4xl text-white">
               ﷺ
             </span>
+
           </div>
 
           <h1 className="text-3xl font-bold text-[#174c3c]">
@@ -337,14 +384,18 @@ function HomeContent() {
           {checkingSharedProject ? (
 
             <div className="py-8 text-center">
+
               <p className="font-medium text-[#174c3c]">
                 Loading project...
               </p>
+
             </div>
 
           ) : sharedProjectFound ? (
 
             <>
+              {/* SHARED PROJECT */}
+
               <div className="mb-7 text-center">
 
                 <p className="text-sm font-medium text-[#174c3c]">
@@ -383,7 +434,8 @@ function HomeContent() {
                   }}
                   onKeyDown={(e) => {
                     if (
-                      e.key === "Enter"
+                      e.key ===
+                      "Enter"
                     ) {
                       handleContinue();
                     }
@@ -433,6 +485,8 @@ function HomeContent() {
           ) : (
 
             <>
+              {/* NORMAL PROJECT LOGIN */}
+
               <h2 className="text-xl font-semibold text-gray-900">
                 Enter Project
               </h2>
@@ -453,14 +507,21 @@ function HomeContent() {
                 <input
                   id="projectId"
                   type="text"
-                  value={projectId}
+                  value={
+                    projectId
+                  }
                   onChange={(e) => {
                     setProjectId(
                       e.target.value.toUpperCase()
                     );
 
-                    setCopied(false);
-                    setError("");
+                    setCopied(
+                      false
+                    );
+
+                    setError(
+                      ""
+                    );
                   }}
                   placeholder="Enter Project ID"
                   autoCapitalize="characters"
@@ -481,17 +542,22 @@ function HomeContent() {
                 <input
                   id="name"
                   type="text"
-                  value={name}
+                  value={
+                    name
+                  }
                   onChange={(e) => {
                     setName(
                       e.target.value
                     );
 
-                    setError("");
+                    setError(
+                      ""
+                    );
                   }}
                   onKeyDown={(e) => {
                     if (
-                      e.key === "Enter"
+                      e.key ===
+                      "Enter"
                     ) {
                       handleContinue();
                     }
@@ -525,6 +591,8 @@ function HomeContent() {
                   : "Continue"}
               </button>
 
+              {/* SHARE PROJECT */}
+
               <button
                 type="button"
                 onClick={
@@ -546,6 +614,8 @@ function HomeContent() {
                 Enter a Project ID to copy its shareable link.
               </p>
 
+              {/* OR */}
+
               <div className="my-7 flex items-center gap-3">
 
                 <div className="h-px flex-1 bg-gray-200" />
@@ -557,6 +627,8 @@ function HomeContent() {
                 <div className="h-px flex-1 bg-gray-200" />
 
               </div>
+
+              {/* CREATE NEW PROJECT */}
 
               <button
                 type="button"
@@ -584,6 +656,8 @@ function HomeContent() {
 
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-xl sm:p-7">
 
+            {/* HELP HEADER */}
+
             <div className="flex items-start justify-between gap-4">
 
               <div>
@@ -601,7 +675,9 @@ function HomeContent() {
               <button
                 type="button"
                 onClick={() =>
-                  setShowHelp(false)
+                  setShowHelp(
+                    false
+                  )
                 }
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f7f3e9] text-xl text-gray-600"
               >
@@ -616,7 +692,7 @@ function HomeContent() {
 
             <div className="mt-6 space-y-4">
 
-              {/* JOIN EXISTING */}
+              {/* JOIN PROJECT */}
 
               <div className="rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
 
@@ -658,7 +734,7 @@ function HomeContent() {
 
               </div>
 
-              {/* CREATE NEW */}
+              {/* CREATE PROJECT */}
 
               <div className="rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
 
@@ -684,19 +760,19 @@ function HomeContent() {
                     <strong>Project Name</strong> — the name participants will see.
                   </p>
 
-                  <p>
+                  <p className="mt-1">
                     <strong>Project ID</strong> — the unique ID participants use to join.
                   </p>
 
-                  <p>
+                  <p className="mt-1">
                     <strong>Salawat Goal</strong> — the overall target for the project.
                   </p>
 
-                  <p>
+                  <p className="mt-1">
                     <strong>Your Name</strong> — the project creator.
                   </p>
 
-                  <p>
+                  <p className="mt-1">
                     <strong>Admin PIN</strong> — used later to manage the project.
                   </p>
 
@@ -738,6 +814,10 @@ function HomeContent() {
                   The project link is copied to your device. You can paste it into WhatsApp, text messages, email, or another app.
                 </p>
 
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  When someone opens that link, the project is automatically selected. They only need to enter their name.
+                </p>
+
               </div>
 
               {/* ADD SALAWAT */}
@@ -749,12 +829,12 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  After joining a project, select one of the quick-add amounts or enter your own number in the Custom Amount field.
+                  After joining a project, use one of the quick-add buttons or enter your own amount in the Custom Amount field.
                 </p>
 
               </div>
 
-              {/* DAILY */}
+              {/* DAILY GOAL */}
 
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
@@ -763,7 +843,7 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Daily Goal is the daily Salawat target shown to each participant. The project admin can change this goal.
+                  The Daily Goal is the daily Salawat target for each participant. The project admin can adjust this target.
                 </p>
 
               </div>
@@ -777,7 +857,21 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Project Goal is the combined Salawat target for the whole project. Every participant&apos;s contribution adds to the project total.
+                  The Project Goal is the combined Salawat target for everyone in the project. Every participant&apos;s contribution adds to the project total.
+                </p>
+
+              </div>
+
+              {/* SCORECARD */}
+
+              <div className="rounded-2xl bg-[#f7f3e9] p-4">
+
+                <p className="font-semibold text-gray-900">
+                  What is the Scorecard?
+                </p>
+
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  The Scorecard shows how much Salawat each participant has contributed to the project. Participants are listed according to their total contributions.
                 </p>
 
               </div>
@@ -791,7 +885,7 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Milestone Ladder shows the project&apos;s progress at 10%, 25%, 50%, 75%, and 100% of the overall goal.
+                  The Milestone Ladder shows the project&apos;s progress through 10%, 25%, 50%, 75%, and 100% of the overall goal.
                 </p>
 
               </div>
@@ -826,10 +920,14 @@ function HomeContent() {
 
             </div>
 
+            {/* CLOSE HELP */}
+
             <button
               type="button"
               onClick={() =>
-                setShowHelp(false)
+                setShowHelp(
+                  false
+                )
               }
               className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white"
             >
