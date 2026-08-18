@@ -308,8 +308,7 @@ function ProjectContent() {
       }
 
       return Math.min(
-        (total / Number(project.goal)) *
-          100,
+        (total / Number(project.goal)) * 100,
         100
       );
     }, [total, project]);
@@ -508,8 +507,7 @@ function ProjectContent() {
       return [
         {
           percent: 10,
-          label:
-            "Getting Started",
+          label: "Getting Started",
           amount:
             Math.round(
               goal * 0.1
@@ -517,8 +515,7 @@ function ProjectContent() {
         },
         {
           percent: 25,
-          label:
-            "Building Momentum",
+          label: "Building Momentum",
           amount:
             Math.round(
               goal * 0.25
@@ -844,10 +841,7 @@ function ProjectContent() {
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
 
               <p className="text-4xl font-bold text-[#174c3c]">
-                {percentage.toFixed(
-                  0
-                )}
-                %
+                {percentage.toFixed(0)}%
               </p>
 
               <p className="mt-1 text-sm text-gray-500">
@@ -939,49 +933,91 @@ function ProjectContent() {
 
         </div>
 
-        {/* PERSONAL SUMMARY */}
+        {/* COLOR PERSONAL SUMMARY */}
 
         <div className="mb-5 grid gap-3 sm:grid-cols-3">
 
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
+          {/* TODAY */}
 
-            <p className="text-sm text-gray-500">
-              Today
-            </p>
+          <div className="rounded-2xl border border-[#cfe9db] bg-[#eaf7f0] p-5 shadow-sm">
 
-            <p className="mt-1 text-3xl font-bold text-[#174c3c]">
+            <div className="flex items-center justify-between">
+
+              <p className="text-sm font-medium text-[#326b50]">
+                Today
+              </p>
+
+              <span className="text-xl">
+                🌿
+              </span>
+
+            </div>
+
+            <p className="mt-2 text-3xl font-bold text-[#174c3c]">
               {todayTotal.toLocaleString()}
             </p>
 
-          </div>
-
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-
-            <p className="text-sm text-gray-500">
-              Last 7 Days
+            <p className="mt-1 text-xs text-[#56806b]">
+              Salawat today
             </p>
 
-            <p className="mt-1 text-3xl font-bold text-[#174c3c]">
+          </div>
+
+          {/* LAST 7 DAYS */}
+
+          <div className="rounded-2xl border border-[#eadba6] bg-[#fff7dc] p-5 shadow-sm">
+
+            <div className="flex items-center justify-between">
+
+              <p className="text-sm font-medium text-[#806b24]">
+                Last 7 Days
+              </p>
+
+              <span className="text-xl">
+                ✨
+              </span>
+
+            </div>
+
+            <p className="mt-2 text-3xl font-bold text-[#7a6115]">
               {myLast7DaysTotal.toLocaleString()}
             </p>
 
-          </div>
-
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-
-            <p className="text-sm text-gray-500">
-              Your Total
+            <p className="mt-1 text-xs text-[#8b7b46]">
+              Your weekly progress
             </p>
 
-            <p className="mt-1 text-3xl font-bold text-[#174c3c]">
+          </div>
+
+          {/* TOTAL */}
+
+          <div className="rounded-2xl border border-[#cfddea] bg-[#edf5fb] p-5 shadow-sm">
+
+            <div className="flex items-center justify-between">
+
+              <p className="text-sm font-medium text-[#3c6685]">
+                Your Total
+              </p>
+
+              <span className="text-xl">
+                ⭐
+              </span>
+
+            </div>
+
+            <p className="mt-2 text-3xl font-bold text-[#265575]">
               {myTotal.toLocaleString()}
+            </p>
+
+            <p className="mt-1 text-xs text-[#628197]">
+              All-time contribution
             </p>
 
           </div>
 
         </div>
 
-        {/* SCORECARD CALL TO ACTION */}
+        {/* SCORECARD CTA */}
 
         {project.show_participants && (
 
@@ -1428,25 +1464,25 @@ function ProjectContent() {
 
                 </div>
 
-                <div className="rounded-2xl bg-[#f7f3e9] p-4">
+                <div className="rounded-2xl bg-[#edf5fb] p-4">
 
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[#628197]">
                     Your Total
                   </p>
 
-                  <p className="mt-1 text-xl font-bold text-[#174c3c]">
+                  <p className="mt-1 text-xl font-bold text-[#265575]">
                     {myTotal.toLocaleString()}
                   </p>
 
                 </div>
 
-                <div className="rounded-2xl bg-[#f7f3e9] p-4">
+                <div className="rounded-2xl bg-[#fff7dc] p-4">
 
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-[#8b7b46]">
                     Your Rank
                   </p>
 
-                  <p className="mt-1 text-xl font-bold text-[#174c3c]">
+                  <p className="mt-1 text-xl font-bold text-[#7a6115]">
                     {myRank
                       ? `#${myRank}`
                       : "—"}
@@ -1458,8 +1494,7 @@ function ProjectContent() {
 
               {/* PODIUM */}
 
-              {participantTotals.length >
-                0 && (
+              {participantTotals.length > 0 && (
 
                 <div className="mt-7">
 
@@ -1468,8 +1503,6 @@ function ProjectContent() {
                   </p>
 
                   <div className="grid grid-cols-3 items-end gap-2">
-
-                    {/* SECOND */}
 
                     <div className="text-center">
 
@@ -1494,8 +1527,6 @@ function ProjectContent() {
 
                     </div>
 
-                    {/* FIRST */}
-
                     <div className="text-center">
 
                       <div className="mb-2 text-4xl">
@@ -1518,8 +1549,6 @@ function ProjectContent() {
                       </div>
 
                     </div>
-
-                    {/* THIRD */}
 
                     <div className="text-center">
 
@@ -1550,10 +1579,9 @@ function ProjectContent() {
 
               )}
 
-              {/* CONTRIBUTION CHART */}
+              {/* VERTICAL CONTRIBUTION CHART */}
 
-              {scorecardChartData.length >
-                0 && (
+              {scorecardChartData.length > 0 && (
 
                 <div className="mt-7 rounded-3xl border border-[#e5ded0] p-5">
 
@@ -1565,16 +1593,7 @@ function ProjectContent() {
                     Top contributors by total Salawat
                   </p>
 
-                  <div
-                    className="mt-5"
-                    style={{
-                      height: Math.max(
-                        240,
-                        scorecardChartData.length *
-                          48
-                      ),
-                    }}
-                  >
+                  <div className="mt-5 h-72">
 
                     <ResponsiveContainer
                       width="100%"
@@ -1585,34 +1604,36 @@ function ProjectContent() {
                         data={
                           scorecardChartData
                         }
-                        layout="vertical"
                         margin={{
-                          top: 5,
-                          right: 20,
-                          bottom: 5,
-                          left: 10,
+                          top: 15,
+                          right: 10,
+                          left: 0,
+                          bottom: 25,
                         }}
                       >
 
                         <CartesianGrid
                           strokeDasharray="3 3"
-                          horizontal={
-                            false
-                          }
+                          vertical={false}
                         />
 
                         <XAxis
-                          type="number"
+                          dataKey="name"
                           tickLine={false}
                           axisLine={false}
+                          interval={0}
+                          angle={-25}
+                          textAnchor="end"
+                          height={65}
+                          tick={{
+                            fontSize: 11,
+                          }}
                         />
 
                         <YAxis
-                          type="category"
-                          dataKey="name"
-                          width={90}
                           tickLine={false}
                           axisLine={false}
+                          width={55}
                         />
 
                         <Tooltip
@@ -1630,11 +1651,12 @@ function ProjectContent() {
                           dataKey="total"
                           fill="#174c3c"
                           radius={[
+                            8,
+                            8,
                             0,
-                            8,
-                            8,
                             0,
                           ]}
+                          maxBarSize={55}
                         />
 
                       </BarChart>
@@ -1660,8 +1682,7 @@ function ProjectContent() {
                   <span className="text-xs text-gray-400">
                     {participantTotals.length}{" "}
                     participant
-                    {participantTotals.length ===
-                    1
+                    {participantTotals.length === 1
                       ? ""
                       : "s"}
                   </span>
