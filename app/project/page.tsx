@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  Suspense,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -11,19 +11,6 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 
 import { supabase } from "@/lib/supabase/client";
 
@@ -33,62 +20,69 @@ type Project = {
   project_name: string;
   goal: number;
   daily_goal: number;
-  created_by: string;
-  created_at: string;
   show_participants: boolean;
 };
 
-type SalawatEntry = {
+type Entry = {
   id: number;
-  project_id: string;
   participant_name: string;
   amount: number;
   created_at: string;
 };
 
-type ParticipantTotal = {
-  name: string;
-  total: number;
-};
-
-type ChartDay = {
-  day: string;
-  total: number;
-};
-
-export default function ProjectPage() {
+function AdminContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const projectCode =
-    searchParams.get("projectId")?.toUpperCase() || "";
+    searchParams.get("projectId")?.trim().toUpperCase() || "";
 
   const userName =
-    searchParams.get("name")?.trim() || "Guest";
+    searchParams.get("name")?.trim() || "";
 
   const [project, setProject] =
     useState<Project | null>(null);
 
   const [entries, setEntries] =
-    useState<SalawatEntry[]>([]);
+    useState<Entry[]>([]);
 
-  const [amount, setAmount] =
+  const [adminPin, setAdminPin] =
     useState("");
+
+  const [verified, setVerified] =
+    useState(false);
+
+  const [projectName, setProjectName] =
+    useState("");
+
+  const [goal, setGoal] =
+    useState("");
+
+  const [dailyGoal, setDailyGoal] =
+    useState("");
+
+  const [
+    showParticipants,
+    setShowParticipants,
+  ] = useState(true);
 
   const [loading, setLoading] =
     useState(true);
 
-  const [adding, setAdding] =
+  const [verifying, setVerifying] =
     useState(false);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [deletingId, setDeletingId] =
+    useState<number | null>(null);
 
   const [error, setError] =
     useState("");
 
   const [success, setSuccess] =
     useState("");
-
-  const [pendingAmount, setPendingAmount] =
-    useState<number | null>(null);
 
   const loadProject = useCallback(async () => {
     if (!projectCode) {
@@ -100,12 +94,12 @@ export default function ProjectPage() {
     setError("");
 
     const {
-      data: projectData,
+      data,
       error: projectError,
     } = await supabase
       .from("projects")
       .select(
-        "id, project_code, project_name, goal, daily_goal, created_by, created_at, show_participants"
+        "id, project_code, project_name, goal, daily_goal, show_participants"
       )
       .eq(
         "project_code",
@@ -114,9 +108,7 @@ export default function ProjectPage() {
       .maybeSingle();
 
     if (projectError) {
-      console.error(
-        projectError
-      );
+      console.error(projectError);
 
       setError(
         "Unable to load project."
@@ -126,7 +118,7 @@ export default function ProjectPage() {
       return;
     }
 
-    if (!projectData) {
+    if (!data) {
       setError(
         "Project not found."
       );
@@ -135,44 +127,46 @@ export default function ProjectPage() {
       return;
     }
 
+    const projectData: Project = {
+      id: data.id,
+      project_code:
+        data.project_code,
+      project_name:
+        data.project_name,
+      goal: Number(
+        data.goal
+      ),
+      daily_goal:
+        Number(
+          data.daily_goal
+        ) || 100,
+      show_participants:
+        data.show_participants ??
+        true,
+    };
+
     setProject(
       projectData
     );
 
-    const {
-      data: entryData,
-      error: entryError,
-    } = await supabase
-      .from("salawat_entries")
-      .select(
-        "id, project_id, participant_name, amount, created_at"
+    setProjectName(
+      projectData.project_name
+    );
+
+    setGoal(
+      String(
+        projectData.goal
       )
-      .eq(
-        "project_id",
-        projectData.id
+    );
+
+    setDailyGoal(
+      String(
+        projectData.daily_goal
       )
-      .order(
-        "created_at",
-        {
-          ascending: false,
-        }
-      );
+    );
 
-    if (entryError) {
-      console.error(
-        entryError
-      );
-
-      setError(
-        "Unable to load Salawat entries."
-      );
-
-      setLoading(false);
-      return;
-    }
-
-    setEntries(
-      entryData || []
+    setShowParticipants(
+      projectData.show_participants
     );
 
     setLoading(false);
@@ -181,552 +175,302 @@ export default function ProjectPage() {
     router,
   ]);
 
+  const loadEntries = useCallback(
+    async (
+      projectId: string
+    ) => {
+      const {
+        data,
+        error: entryError,
+      } = await supabase
+        .from(
+          "salawat_entries"
+        )
+        .select(
+          "id, participant_name, amount, created_at"
+        )
+        .eq(
+          "project_id",
+          projectId
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        )
+        .limit(50);
+
+      if (entryError) {
+        console.error(
+          entryError
+        );
+
+        setError(
+          "Unable to load recent entries."
+        );
+
+        return;
+      }
+
+      const cleanEntries: Entry[] =
+        (data || []).map(
+          (entry) => ({
+            id:
+              Number(
+                entry.id
+              ),
+
+            participant_name:
+              entry.participant_name,
+
+            amount:
+              Number(
+                entry.amount
+              ),
+
+            created_at:
+              entry.created_at,
+          })
+        );
+
+      setEntries(
+        cleanEntries
+      );
+    },
+    []
+  );
+
   useEffect(() => {
     loadProject();
   }, [
     loadProject,
   ]);
 
-  const total =
-    useMemo(() => {
-      return entries.reduce(
-        (
-          sum,
-          entry
-        ) =>
-          sum +
-          Number(
-            entry.amount
-          ),
-        0
+  async function verifyPin() {
+    setError("");
+    setSuccess("");
+
+    if (!adminPin.trim()) {
+      setError(
+        "Please enter the Admin PIN."
       );
-    }, [
-      entries,
-    ]);
 
-  const myEntries =
-    useMemo(() => {
-      return entries.filter(
-        (entry) =>
-          entry.participant_name
-            .trim()
-            .toLowerCase() ===
-          userName
-            .trim()
-            .toLowerCase()
+      return;
+    }
+
+    setVerifying(
+      true
+    );
+
+    const {
+      data,
+      error: verifyError,
+    } = await supabase.rpc(
+      "verify_project_admin",
+      {
+        p_project_code:
+          projectCode,
+
+        p_admin_pin:
+          adminPin,
+      }
+    );
+
+    setVerifying(
+      false
+    );
+
+    if (verifyError) {
+      console.error(
+        verifyError
       );
-    }, [
-      entries,
-      userName,
-    ]);
 
-  const myTotal =
-    useMemo(() => {
-      return myEntries.reduce(
-        (
-          sum,
-          entry
-        ) =>
-          sum +
-          Number(
-            entry.amount
-          ),
-        0
+      setError(
+        "Unable to verify Admin PIN."
       );
-    }, [
-      myEntries,
-    ]);
 
-  const todayTotal =
-    useMemo(() => {
-      const now =
-        new Date();
+      return;
+    }
 
-      return myEntries
-        .filter(
-          (entry) => {
-            const entryDate =
-              new Date(
-                entry.created_at
-              );
+    if (!data) {
+      setError(
+        "Incorrect Admin PIN."
+      );
 
-            return (
-              entryDate.getFullYear() ===
-                now.getFullYear() &&
-              entryDate.getMonth() ===
-                now.getMonth() &&
-              entryDate.getDate() ===
-                now.getDate()
-            );
-          }
-        )
-        .reduce(
-          (
-            sum,
-            entry
-          ) =>
-            sum +
-            Number(
-              entry.amount
-            ),
-          0
-        );
-    }, [
-      myEntries,
-    ]);
+      return;
+    }
 
-  const dailyGoal =
-    Number(
-      project?.daily_goal
-    ) || 100;
+    setVerified(
+      true
+    );
 
-  const dailyPercentage =
-    Math.min(
-      (
-        todayTotal /
+    if (project) {
+      await loadEntries(
+        project.id
+      );
+    }
+  }
+
+  async function saveSettings() {
+    setError("");
+    setSuccess("");
+
+    const cleanProjectName =
+      projectName.trim();
+
+    const numericGoal =
+      Number(goal);
+
+    const numericDailyGoal =
+      Number(
         dailyGoal
-      ) * 100,
-      100
+      );
+
+    if (
+      cleanProjectName.length <
+      2
+    ) {
+      setError(
+        "Please enter a valid project name."
+      );
+
+      return;
+    }
+
+    if (
+      !Number.isFinite(
+        numericGoal
+      ) ||
+      numericGoal <= 0
+    ) {
+      setError(
+        "Please enter a valid overall project goal."
+      );
+
+      return;
+    }
+
+    if (
+      !Number.isFinite(
+        numericDailyGoal
+      ) ||
+      numericDailyGoal <= 0
+    ) {
+      setError(
+        "Please enter a valid daily goal."
+      );
+
+      return;
+    }
+
+    setSaving(
+      true
     );
 
-  const dailyRemaining =
-    Math.max(
-      dailyGoal -
-        todayTotal,
-      0
+    const {
+      error: updateError,
+    } = await supabase.rpc(
+      "update_salawat_project",
+      {
+        p_project_code:
+          projectCode,
+
+        p_admin_pin:
+          adminPin,
+
+        p_project_name:
+          cleanProjectName,
+
+        p_goal:
+          numericGoal,
+
+        p_daily_goal:
+          numericDailyGoal,
+
+        p_show_participants:
+          showParticipants,
+      }
     );
 
-  const weeklyProjectTotal =
-    useMemo(() => {
-      const sevenDaysAgo =
-        new Date();
+    setSaving(
+      false
+    );
 
-      sevenDaysAgo.setHours(
-        0,
-        0,
-        0,
-        0
+    if (updateError) {
+      console.error(
+        updateError
       );
 
-      sevenDaysAgo.setDate(
-        sevenDaysAgo.getDate() -
-          6
+      setError(
+        updateError.message ||
+          "Unable to update project."
       );
 
-      return entries
-        .filter(
-          (entry) =>
-            new Date(
-              entry.created_at
-            ) >=
-            sevenDaysAgo
-        )
-        .reduce(
-          (
-            sum,
-            entry
-          ) =>
-            sum +
-            Number(
-              entry.amount
-            ),
-          0
-        );
-    }, [
-      entries,
-    ]);
+      return;
+    }
 
-  const monthlyProjectTotal =
-    useMemo(() => {
-      const now =
-        new Date();
+    setSuccess(
+      "Project settings updated."
+    );
 
-      return entries
-        .filter(
-          (entry) => {
-            const entryDate =
-              new Date(
-                entry.created_at
-              );
+    await loadProject();
 
-            return (
-              entryDate.getMonth() ===
-                now.getMonth() &&
-              entryDate.getFullYear() ===
-                now.getFullYear()
-            );
-          }
-        )
-        .reduce(
-          (
-            sum,
-            entry
-          ) =>
-            sum +
-            Number(
-              entry.amount
-            ),
-          0
-        );
-    }, [
-      entries,
-    ]);
-
-  const percentage =
-    useMemo(() => {
-      if (
-        !project ||
-        Number(
-          project.goal
-        ) <= 0
-      ) {
-        return 0;
-      }
-
-      return Math.min(
-        (
-          total /
-          Number(
-            project.goal
-          )
-        ) * 100,
-        100
-      );
-    }, [
-      total,
-      project,
-    ]);
-
-  const remaining =
-    project
-      ? Math.max(
-          Number(
-            project.goal
-          ) -
-            total,
-          0
-        )
-      : 0;
-
-  const participantTotals =
-    useMemo<
-      ParticipantTotal[]
-    >(() => {
-      const totals =
-        new Map<
-          string,
-          {
-            name: string;
-            total: number;
-          }
-        >();
-
-      entries.forEach(
-        (entry) => {
-          const cleanName =
-            entry.participant_name.trim();
-
-          const key =
-            cleanName.toLowerCase();
-
-          const existing =
-            totals.get(
-              key
-            );
-
-          if (
-            existing
-          ) {
-            existing.total +=
-              Number(
-                entry.amount
-              );
-          } else {
-            totals.set(
-              key,
-              {
-                name:
-                  cleanName,
-                total:
-                  Number(
-                    entry.amount
-                  ),
-              }
-            );
-          }
-        }
-      );
-
-      return Array.from(
-        totals.values()
-      ).sort(
-        (
-          a,
-          b
-        ) =>
-          b.total -
-          a.total
-      );
-    }, [
-      entries,
-    ]);
-
-  const chartData =
-    useMemo<
-      ChartDay[]
-    >(() => {
-      const days:
-        ChartDay[] =
-        [];
-
-      for (
-        let i = 6;
-        i >= 0;
-        i--
-      ) {
-        const date =
-          new Date();
-
-        date.setHours(
-          0,
-          0,
-          0,
-          0
-        );
-
-        date.setDate(
-          date.getDate() -
-            i
-        );
-
-        const nextDate =
-          new Date(
-            date
-          );
-
-        nextDate.setDate(
-          nextDate.getDate() +
-            1
-        );
-
-        const dayTotal =
-          entries
-            .filter(
-              (
-                entry
-              ) => {
-                const entryDate =
-                  new Date(
-                    entry.created_at
-                  );
-
-                return (
-                  entryDate >=
-                    date &&
-                  entryDate <
-                    nextDate
-                );
-              }
-            )
-            .reduce(
-              (
-                sum,
-                entry
-              ) =>
-                sum +
-                Number(
-                  entry.amount
-                ),
-              0
-            );
-
-        days.push({
-          day:
-            date.toLocaleDateString(
-              "en-US",
-              {
-                weekday:
-                  "short",
-              }
-            ),
-          total:
-            dayTotal,
-        });
-      }
-
-      return days;
-    }, [
-      entries,
-    ]);
-
-  const goalChartData =
-    useMemo(() => {
-      return [
-        {
-          name:
-            "Completed",
-          value:
-            total,
-        },
-        {
-          name:
-            "Remaining",
-          value:
-            remaining,
-        },
-      ];
-    }, [
-      total,
-      remaining,
-    ]);
-
-  const milestones =
-    useMemo(() => {
-      if (
-        !project
-      ) {
-        return [];
-      }
-
-      const goal =
-        Number(
-          project.goal
-        );
-
-      return [
-        {
-          percent: 10,
-          label:
-            "Getting Started",
-          amount:
-            Math.round(
-              goal *
-                0.1
-            ),
-        },
-        {
-          percent: 25,
-          label:
-            "Building Momentum",
-          amount:
-            Math.round(
-              goal *
-                0.25
-            ),
-        },
-        {
-          percent: 50,
-          label:
-            "Halfway",
-          amount:
-            Math.round(
-              goal *
-                0.5
-            ),
-        },
-        {
-          percent: 75,
-          label:
-            "Almost There",
-          amount:
-            Math.round(
-              goal *
-                0.75
-            ),
-        },
-        {
-          percent: 100,
-          label:
-            "Project Goal",
-          amount:
-            goal,
-        },
-      ];
-    }, [
-      project,
-    ]);
-
-  function askQuickAddConfirmation(
-    value: number
-  ) {
-    setPendingAmount(
-      value
+    window.setTimeout(
+      () => {
+        setSuccess("");
+      },
+      3000
     );
   }
 
-  async function addSalawat(
-    value?: number
+  async function deleteEntry(
+    entryId: number
   ) {
-    if (
-      !project
-    ) {
+    const confirmed =
+      window.confirm(
+        "Delete this Salawat entry? This cannot be undone."
+      );
+
+    if (!confirmed) {
       return;
     }
 
     setError("");
     setSuccess("");
 
-    const salawatAmount =
-      value !==
-      undefined
-        ? value
-        : Number(
-            amount
-          );
-
-    if (
-      !Number.isFinite(
-        salawatAmount
-      ) ||
-      salawatAmount <=
-        0
-    ) {
-      setError(
-        "Please enter a valid Salawat amount."
-      );
-
-      return;
-    }
-
-    setAdding(
-      true
+    setDeletingId(
+      entryId
     );
 
     const {
-      data,
-      error:
-        insertError,
-    } =
-      await supabase
-        .from(
-          "salawat_entries"
-        )
-        .insert({
-          project_id:
-            project.id,
-          participant_name:
-            userName,
-          amount:
-            salawatAmount,
-        })
-        .select(
-          "id, project_id, participant_name, amount, created_at"
-        )
-        .single();
+      error: deleteError,
+    } = await supabase.rpc(
+      "delete_salawat_entry",
+      {
+        p_project_code:
+          projectCode,
 
-    setAdding(
-      false
+        p_admin_pin:
+          adminPin,
+
+        p_entry_id:
+          entryId,
+      }
     );
 
-    if (
-      insertError
-    ) {
+    setDeletingId(
+      null
+    );
+
+    if (deleteError) {
       console.error(
-        insertError
+        deleteError
       );
 
       setError(
-        "Unable to save your Salawat. Please try again."
+        deleteError.message ||
+          "Unable to delete entry."
       );
 
       return;
@@ -735,62 +479,83 @@ export default function ProjectPage() {
     setEntries(
       (
         previous
-      ) => [
-        data,
-        ...previous,
-      ]
-    );
-
-    setAmount(
-      ""
-    );
-
-    setPendingAmount(
-      null
+      ) =>
+        previous.filter(
+          (entry) =>
+            entry.id !==
+            entryId
+        )
     );
 
     setSuccess(
-      `${salawatAmount.toLocaleString()} Salawat added.`
+      "Entry deleted."
     );
 
     window.setTimeout(
       () => {
-        setSuccess(
-          ""
-        );
+        setSuccess("");
       },
-      2500
+      3000
     );
   }
 
-  if (
-    loading
-  ) {
+  function backToProject() {
+    if (!projectCode) {
+      router.push("/");
+      return;
+    }
+
+    router.push(
+      `/project?projectId=${encodeURIComponent(
+        projectCode
+      )}&name=${encodeURIComponent(
+        userName
+      )}`
+    );
+  }
+
+  if (loading) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
-        <p className="font-medium text-[#174c3c]">
-          Loading Salawat project...
-        </p>
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
+            <span className="text-3xl text-white">
+              ﷺ
+            </span>
+          </div>
+
+          <p className="font-medium text-[#174c3c]">
+            Loading admin settings...
+          </p>
+        </div>
       </main>
     );
   }
 
-  if (
-    !project
-  ) {
+  if (!project) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
-        <div className="w-full max-w-md rounded-3xl bg-white p-7 text-center shadow-sm">
+        <div className="w-full max-w-md rounded-3xl border border-[#e5ded0] bg-white p-7 text-center shadow-sm">
+
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
+            <span className="text-3xl text-white">
+              ﷺ
+            </span>
+          </div>
+
           <h1 className="text-xl font-semibold text-gray-900">
             Project Not Found
           </h1>
 
+          <p className="mt-2 text-sm text-gray-500">
+            {error ||
+              "We couldn't find this Salawat project."}
+          </p>
+
           <button
             type="button"
             onClick={() =>
-              router.push(
-                "/"
-              )
+              router.push("/")
             }
             className="mt-6 w-full rounded-xl bg-[#174c3c] py-3 font-semibold text-white"
           >
@@ -801,586 +566,493 @@ export default function ProjectPage() {
     );
   }
 
-  return (
-    <main className="min-h-screen bg-[#f7f3e9] px-4 py-8 sm:px-5">
-      <div className="mx-auto w-full max-w-3xl">
+  if (!verified) {
+    return (
+      <main className="min-h-screen bg-[#f7f3e9] px-5 py-10">
+        <div className="mx-auto w-full max-w-md">
 
-        <p
-          dir="rtl"
-          className="mb-6 text-center text-2xl font-medium text-[#174c3c]"
-        >
-          اللهم صل وسلم على نبينا محمد
-        </p>
-
-        <div className="mb-6 flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() =>
-              router.push(
-                "/"
-              )
+            onClick={
+              backToProject
+            }
+            className="mb-6 text-sm font-medium text-[#174c3c]"
+          >
+            ← Back to Project
+          </button>
+
+          <div className="rounded-3xl border border-[#e5ded0] bg-white p-7 shadow-sm">
+
+            <div className="mb-6 text-center">
+
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
+                <span className="text-3xl text-white">
+                  ﷺ
+                </span>
+              </div>
+
+              <h1 className="text-2xl font-bold text-[#174c3c]">
+                Admin Settings
+              </h1>
+
+              <p className="mt-2 text-gray-600">
+                {project.project_name}
+              </p>
+
+              <p className="mt-2 text-xs font-medium text-gray-400">
+                Project ID:{" "}
+                {project.project_code}
+              </p>
+
+            </div>
+
+            <div>
+              <label
+                htmlFor="adminPin"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Admin PIN
+              </label>
+
+              <input
+                id="adminPin"
+                type="password"
+                value={
+                  adminPin
+                }
+                onChange={(
+                  e
+                ) => {
+                  setAdminPin(
+                    e.target.value
+                  );
+
+                  setError("");
+                }}
+                onKeyDown={(
+                  e
+                ) => {
+                  if (
+                    e.key ===
+                    "Enter"
+                  ) {
+                    verifyPin();
+                  }
+                }}
+                placeholder="Enter Admin PIN"
+                autoFocus
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+              />
+            </div>
+
+            {error && (
+              <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="button"
+              disabled={
+                verifying
+              }
+              onClick={
+                verifyPin
+              }
+              className="mt-5 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {verifying
+                ? "Checking..."
+                : "Enter Admin"}
+            </button>
+
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f7f3e9] px-4 py-8 sm:px-5">
+
+      <div className="mx-auto w-full max-w-2xl">
+
+        {/* TOP BAR */}
+
+        <div className="mb-6 flex items-center justify-between gap-3">
+
+          <button
+            type="button"
+            onClick={
+              backToProject
             }
             className="text-sm font-medium text-[#174c3c]"
           >
-            ← Leave Project
+            ← Back to Project
           </button>
 
-          <button
-            type="button"
-            onClick={() =>
-              router.push(
-                `/admin?projectId=${encodeURIComponent(
-                  project.project_code
-                )}&name=${encodeURIComponent(
-                  userName
-                )}`
-              )
-            }
-            className="rounded-full border border-[#174c3c] px-3 py-1.5 text-xs font-semibold text-[#174c3c]"
-          >
-            Admin
-          </button>
+          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 shadow-sm">
+            {project.project_code}
+          </span>
+
         </div>
 
-        <div className="mb-7 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
-            <span className="text-3xl text-white">
-              ﷺ
-            </span>
-          </div>
+        {/* HEADER */}
+
+        <div className="mb-6">
 
           <h1 className="text-3xl font-bold text-[#174c3c]">
-            {project.project_name}
+            Admin Settings
           </h1>
 
-          <p className="mt-3 text-gray-600">
-            Assalamu Alaikum,{" "}
-            {userName}
+          <p className="mt-2 text-gray-600">
+            Manage{" "}
+            {project.project_name}
           </p>
 
-          <p className="mt-2 text-sm text-gray-500">
-            Project ID:{" "}
-            <span className="font-semibold text-[#174c3c]">
-              {project.project_code}
-            </span>
-          </p>
         </div>
+
+        {/* SETTINGS */}
 
         <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-sm">
-          <div className="text-center">
-            <p className="text-sm text-gray-500">
-              Project Goal
-            </p>
 
-            <p className="mt-1 text-xl font-semibold text-gray-900">
-              {Number(
-                project.goal
-              ).toLocaleString()}{" "}
-              Salawat
-            </p>
-          </div>
-
-          <div className="relative mx-auto mt-5 h-56 w-56">
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-              <PieChart>
-                <Pie
-                  data={
-                    goalChartData
-                  }
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={
-                    72
-                  }
-                  outerRadius={
-                    96
-                  }
-                  startAngle={
-                    90
-                  }
-                  endAngle={
-                    -270
-                  }
-                  stroke="none"
-                >
-                  <Cell
-                    fill="#174c3c"
-                  />
-
-                  <Cell
-                    fill="#e5e7eb"
-                  />
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <p className="text-4xl font-bold text-[#174c3c]">
-                {percentage.toFixed(
-                  0
-                )}
-                %
-              </p>
-
-              <p className="mt-1 text-sm text-gray-500">
-                Complete
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-[#f7f3e9] p-4 text-center">
-              <p className="text-xs text-gray-500">
-                Completed
-              </p>
-
-              <p className="mt-1 text-xl font-bold text-[#174c3c]">
-                {total.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-[#f7f3e9] p-4 text-center">
-              <p className="text-xs text-gray-500">
-                Remaining
-              </p>
-
-              <p className="mt-1 text-xl font-bold text-gray-900">
-                {remaining.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-5 rounded-3xl bg-[#174c3c] p-6 text-white">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm text-white/70">
-                Your Daily Goal
-              </p>
-
-              <p className="mt-1 text-3xl font-bold">
-                {todayTotal.toLocaleString()}
-              </p>
-
-              <p className="mt-1 text-sm text-white/70">
-                of{" "}
-                {dailyGoal.toLocaleString()}{" "}
-                Salawat
-              </p>
-            </div>
-
-            <div className="rounded-full bg-white/15 px-3 py-2 text-sm font-semibold">
-              {dailyPercentage.toFixed(
-                0
-              )}
-              %
-            </div>
-          </div>
-
-          <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/20">
-            <div
-              className="h-full rounded-full bg-white transition-all duration-500"
-              style={{
-                width: `${dailyPercentage}%`,
-              }}
-            />
-          </div>
-
-          <p className="mt-3 text-sm text-white/70">
-            {dailyRemaining ===
-            0
-              ? "✓ Daily goal completed!"
-              : `${dailyRemaining.toLocaleString()} remaining today`}
-          </p>
-        </div>
-
-        <div className="mb-5 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">
-              Your Total
-            </p>
-
-            <p className="mt-1 text-3xl font-bold text-[#174c3c]">
-              {myTotal.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">
-              Last 7 Days
-            </p>
-
-            <p className="mt-1 text-3xl font-bold text-[#174c3c]">
-              {weeklyProjectTotal.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">
-              This Month
-            </p>
-
-            <p className="mt-1 text-3xl font-bold text-[#174c3c]">
-              {monthlyProjectTotal.toLocaleString()}
-            </p>
-          </div>
-        </div>
-
-        <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900">
-            Add Salawat
+            Project Settings
           </h2>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
-            {[10, 33, 100, 500, 1000].map(
-              (
-                value
-              ) => (
-                <button
-                  key={
-                    value
-                  }
-                  type="button"
-                  disabled={
-                    adding
-                  }
-                  onClick={() =>
-                    askQuickAddConfirmation(
-                      value
-                    )
-                  }
-                  className="rounded-xl border border-[#174c3c] py-3 font-semibold text-[#174c3c]"
-                >
-                  +
-                  {
-                    value
-                  }
-                </button>
-              )
-            )}
+          <p className="mt-1 text-sm text-gray-500">
+            Update goals and project preferences.
+          </p>
+
+          {/* PROJECT NAME */}
+
+          <div className="mt-6">
+
+            <label
+              htmlFor="projectName"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Project Name
+            </label>
+
+            <input
+              id="projectName"
+              type="text"
+              value={
+                projectName
+              }
+              onChange={(
+                e
+              ) => {
+                setProjectName(
+                  e.target.value
+                );
+
+                setError("");
+              }}
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+            />
+
           </div>
 
-          <input
-            type="number"
-            min="1"
-            value={
-              amount
-            }
-            onChange={(
-              e
-            ) =>
-              setAmount(
-                e.target.value
-              )
-            }
-            placeholder="Custom amount"
-            className="mt-5 w-full rounded-xl border border-gray-300 px-4 py-3"
-          />
+          {/* OVERALL GOAL */}
+
+          <div className="mt-5">
+
+            <label
+              htmlFor="overallGoal"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Overall Project Goal
+            </label>
+
+            <input
+              id="overallGoal"
+              type="number"
+              min="1"
+              step="1"
+              value={
+                goal
+              }
+              onChange={(
+                e
+              ) => {
+                setGoal(
+                  e.target.value
+                );
+
+                setError("");
+              }}
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+            />
+
+            <p className="mt-2 text-xs text-gray-500">
+              Example: 1,000,000 Salawat for the entire project.
+            </p>
+
+          </div>
+
+          {/* DAILY GOAL */}
+
+          <div className="mt-5 rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
+
+            <div className="mb-3">
+
+              <p className="text-sm font-semibold text-[#174c3c]">
+                Daily Salawat Goal
+              </p>
+
+              <p className="mt-1 text-xs text-gray-500">
+                This is the daily target shown to each participant.
+              </p>
+
+            </div>
+
+            <input
+              id="dailyGoal"
+              type="number"
+              min="1"
+              step="1"
+              value={
+                dailyGoal
+              }
+              onChange={(
+                e
+              ) => {
+                setDailyGoal(
+                  e.target.value
+                );
+
+                setError("");
+              }}
+              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+            />
+
+            <div className="mt-3 flex flex-wrap gap-2">
+
+              {[33, 100, 500, 1000].map(
+                (
+                  preset
+                ) => (
+                  <button
+                    key={
+                      preset
+                    }
+                    type="button"
+                    onClick={() =>
+                      setDailyGoal(
+                        String(
+                          preset
+                        )
+                      )
+                    }
+                    className="rounded-full border border-[#174c3c]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
+                  >
+                    {preset.toLocaleString()}
+                  </button>
+                )
+              )}
+
+            </div>
+
+          </div>
+
+          {/* PARTICIPANT VISIBILITY */}
+
+          <div className="mt-6 flex items-start gap-3 rounded-2xl bg-[#f7f3e9] p-4">
+
+            <input
+              id="showParticipants"
+              type="checkbox"
+              checked={
+                showParticipants
+              }
+              onChange={(
+                e
+              ) =>
+                setShowParticipants(
+                  e.target.checked
+                )
+              }
+              className="mt-1 h-4 w-4 accent-[#174c3c]"
+            />
+
+            <div>
+
+              <label
+                htmlFor="showParticipants"
+                className="font-medium text-gray-900"
+              >
+                Show participant totals
+              </label>
+
+              <p className="mt-1 text-sm text-gray-500">
+                When enabled, participants can see names and total Salawat contributions.
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* MESSAGES */}
 
           {error && (
-            <p className="mt-3 text-sm text-red-600">
+            <div className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
-            </p>
+            </div>
           )}
 
           {success && (
-            <p className="mt-3 text-sm text-green-700">
-              ✓{" "}
-              {
-                success
-              }
-            </p>
+            <div className="mt-5 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+              ✓ {success}
+            </div>
           )}
+
+          {/* SAVE */}
 
           <button
             type="button"
-            onClick={() =>
-              addSalawat()
-            }
             disabled={
-              adding
+              saving
             }
-            className="mt-4 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white"
+            onClick={
+              saveSettings
+            }
+            className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {adding
+            {saving
               ? "Saving..."
-              : "Add Salawat"}
+              : "Save Settings"}
           </button>
+
         </div>
 
-        <div className="mb-5 rounded-3xl bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">
-            Last 7 Days
-          </h2>
+        {/* RECENT ENTRIES */}
 
-          <p className="mt-1 text-sm text-gray-500">
-            Project Salawat activity
-          </p>
+        <div className="rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-sm">
 
-          <div className="mt-5 h-64">
-            <ResponsiveContainer>
-              <BarChart
-                data={
-                  chartData
-                }
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={
-                    false
-                  }
-                />
-
-                <XAxis
-                  dataKey="day"
-                />
-
-                <YAxis />
-
-                <Tooltip />
-
-                <Bar
-                  dataKey="total"
-                  fill="#174c3c"
-                  radius={[
-                    8,
-                    8,
-                    0,
-                    0,
-                  ]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="mb-5 rounded-3xl bg-white p-6 shadow-sm">
           <h2 className="text-xl font-semibold text-gray-900">
-            Project Milestone Ladder
+            Recent Entries
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Every step brings the project closer to its goal.
+            Review and remove incorrect Salawat entries.
           </p>
 
-          <div className="mt-6">
-            {milestones.map(
-              (
-                milestone,
-                index
-              ) => {
-                const reached =
-                  total >=
-                  milestone.amount;
+          <div className="mt-5 space-y-3">
 
-                const previousAmount =
-                  index ===
-                  0
-                    ? 0
-                    : milestones[
-                        index -
-                          1
-                      ]
-                        .amount;
+            {entries.length ===
+            0 ? (
 
-                const current =
-                  !reached &&
-                  total >=
-                    previousAmount;
+              <div className="rounded-2xl bg-[#f7f3e9] p-5 text-center">
 
-                return (
+                <p className="text-sm text-gray-500">
+                  No Salawat entries yet.
+                </p>
+
+              </div>
+
+            ) : (
+
+              entries.map(
+                (
+                  entry
+                ) => (
+
                   <div
                     key={
-                      milestone.percent
+                      entry.id
                     }
-                    className="relative flex gap-4 pb-6 last:pb-0"
+                    className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f3e9] px-4 py-3"
                   >
-                    {index <
-                      milestones.length -
-                        1 && (
-                      <div
-                        className={`absolute left-[17px] top-9 h-full w-0.5 ${
-                          reached
-                            ? "bg-[#174c3c]"
-                            : "bg-gray-200"
-                        }`}
-                      />
-                    )}
 
-                    <div
-                      className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold ${
-                        reached
-                          ? "border-[#174c3c] bg-[#174c3c] text-white"
-                          : current
-                          ? "border-[#174c3c] bg-white text-[#174c3c]"
-                          : "border-gray-300 bg-white text-gray-400"
-                      }`}
-                    >
-                      {reached
-                        ? "✓"
-                        : index +
-                          1}
+                    <div className="min-w-0">
+
+                      <p className="truncate font-medium text-gray-900">
+                        {
+                          entry.participant_name
+                        }
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500">
+                        {new Date(
+                          entry.created_at
+                        ).toLocaleString()}
+                      </p>
+
                     </div>
 
-                    <div
-                      className={`flex-1 rounded-2xl p-4 ${
-                        current
-                          ? "border border-[#174c3c] bg-[#f4f8f6]"
-                          : "bg-[#f7f3e9]"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p
-                            className={`font-semibold ${
-                              reached ||
-                              current
-                                ? "text-[#174c3c]"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            {
-                              milestone.label
-                            }
-                          </p>
+                    <div className="flex shrink-0 items-center gap-4">
 
-                          <p className="mt-1 text-sm text-gray-500">
-                            {
-                              milestone.percent
-                            }
-                            % of project goal
-                          </p>
-                        </div>
+                      <span className="font-semibold text-[#174c3c]">
+                        +
+                        {Number(
+                          entry.amount
+                        ).toLocaleString()}
+                      </span>
 
-                        <p className="font-bold text-gray-900">
-                          {milestone.amount.toLocaleString()}
-                        </p>
-                      </div>
+                      <button
+                        type="button"
+                        disabled={
+                          deletingId ===
+                          entry.id
+                        }
+                        onClick={() =>
+                          deleteEntry(
+                            entry.id
+                          )
+                        }
+                        className="text-sm font-semibold text-red-600 disabled:opacity-50"
+                      >
+                        {deletingId ===
+                        entry.id
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
 
-                      {current && (
-                        <p className="mt-3 text-sm font-medium text-[#174c3c]">
-                          {Math.max(
-                            milestone.amount -
-                              total,
-                            0
-                          ).toLocaleString()}{" "}
-                          Salawat to reach this milestone
-                        </p>
-                      )}
-
-                      {reached && (
-                        <p className="mt-3 text-sm font-medium text-[#174c3c]">
-                          ✓ Milestone reached
-                        </p>
-                      )}
                     </div>
+
                   </div>
-                );
-              }
+
+                )
+              )
+
             )}
+
           </div>
+
         </div>
 
-        {project.show_participants &&
-          participantTotals.length >
-            0 && (
-            <div className="mb-5 rounded-3xl bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-semibold">
-                Participant Contributions
-              </h2>
-
-              <div className="mt-5 space-y-3">
-                {participantTotals
-                  .slice(
-                    0,
-                    10
-                  )
-                  .map(
-                    (
-                      participant,
-                      index
-                    ) => (
-                      <div
-                        key={`${participant.name}-${index}`}
-                        className="flex justify-between rounded-2xl bg-[#f7f3e9] px-4 py-3"
-                      >
-                        <span>
-                          {index +
-                            1}
-                          .{" "}
-                          {
-                            participant.name
-                          }
-                        </span>
-
-                        <strong className="text-[#174c3c]">
-                          {participant.total.toLocaleString()}
-                        </strong>
-                      </div>
-                    )
-                  )}
-              </div>
-            </div>
-          )}
-
-        {pendingAmount !==
-          null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
-            <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl">
-              <h2 className="text-xl font-semibold">
-                Confirm Salawat
-              </h2>
-
-              <p className="mt-3 text-gray-600">
-                Add{" "}
-                <strong className="text-[#174c3c]">
-                  {pendingAmount.toLocaleString()}
-                </strong>{" "}
-                Salawat?
-              </p>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  disabled={
-                    adding
-                  }
-                  onClick={() =>
-                    setPendingAmount(
-                      null
-                    )
-                  }
-                  className="rounded-xl border border-gray-300 py-3 font-semibold text-gray-700"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="button"
-                  disabled={
-                    adding
-                  }
-                  onClick={() =>
-                    addSalawat(
-                      pendingAmount
-                    )
-                  }
-                  className="rounded-xl bg-[#174c3c] py-3 font-semibold text-white disabled:opacity-60"
-                >
-                  {adding
-                    ? "Adding..."
-                    : "Confirm"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
     </main>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
+
+          <div className="text-center">
+
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
+              <span className="text-3xl text-white">
+                ﷺ
+              </span>
+            </div>
+
+            <p className="font-medium text-[#174c3c]">
+              Loading admin settings...
+            </p>
+
+          </div>
+
+        </main>
+      }
+    >
+      <AdminContent />
+    </Suspense>
   );
 }
