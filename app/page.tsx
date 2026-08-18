@@ -448,7 +448,7 @@ function HomeContent() {
                     setCopied(false);
                     setError("");
                   }}
-                  placeholder="Example: RAHMA2026"
+                  placeholder="Example: Enter Project ID"
                   autoCapitalize="characters"
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
                 />
