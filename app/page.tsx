@@ -69,13 +69,8 @@ function HomeContent() {
         return;
       }
 
-      setProjectId(
-        cleanProjectId
-      );
-
-      setCheckingSharedProject(
-        true
-      );
+      setProjectId(cleanProjectId);
+      setCheckingSharedProject(true);
 
       const {
         data,
@@ -91,14 +86,10 @@ function HomeContent() {
         )
         .maybeSingle();
 
-      setCheckingSharedProject(
-        false
-      );
+      setCheckingSharedProject(false);
 
       if (projectError) {
-        console.error(
-          projectError
-        );
+        console.error(projectError);
 
         setError(
           "Unable to load the shared project."
@@ -119,9 +110,7 @@ function HomeContent() {
         data.project_name
       );
 
-      setSharedProjectFound(
-        true
-      );
+      setSharedProjectFound(true);
     }
 
     loadSharedProject();
@@ -156,9 +145,7 @@ function HomeContent() {
       return;
     }
 
-    setLoading(
-      true
-    );
+    setLoading(true);
 
     const {
       data,
@@ -174,14 +161,10 @@ function HomeContent() {
       )
       .maybeSingle();
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
     if (projectError) {
-      console.error(
-        projectError
-      );
+      console.error(projectError);
 
       setError(
         "Unable to connect. Please try again."
@@ -224,9 +207,7 @@ function HomeContent() {
       return;
     }
 
-    setSharing(
-      true
-    );
+    setSharing(true);
 
     const {
       data,
@@ -242,14 +223,10 @@ function HomeContent() {
       )
       .maybeSingle();
 
-    setSharing(
-      false
-    );
+    setSharing(false);
 
     if (projectError) {
-      console.error(
-        projectError
-      );
+      console.error(projectError);
 
       setError(
         "Unable to find the project."
@@ -276,15 +253,11 @@ function HomeContent() {
         projectLink
       );
 
-      setCopied(
-        true
-      );
+      setCopied(true);
 
       window.setTimeout(
         () => {
-          setCopied(
-            false
-          );
+          setCopied(false);
         },
         2500
       );
@@ -304,40 +277,24 @@ function HomeContent() {
   function joinDifferentProject() {
     router.push("/");
 
-    setSharedProjectFound(
-      false
-    );
-
-    setProjectName(
-      ""
-    );
-
-    setProjectId(
-      ""
-    );
-
-    setName(
-      ""
-    );
-
-    setError(
-      ""
-    );
+    setSharedProjectFound(false);
+    setProjectName("");
+    setProjectId("");
+    setName("");
+    setError("");
   }
 
   return (
-    <main className="relative min-h-screen bg-[#f7f3e9] px-5 py-10">
+    <main className="relative min-h-screen bg-[#f7f3e9] px-4 py-10 sm:px-6">
 
-      {/* HOW TO USE - TOP RIGHT */}
+      {/* HOW TO USE */}
 
       <div className="absolute right-5 top-5 sm:right-8 sm:top-7">
 
         <button
           type="button"
           onClick={() =>
-            setShowHelp(
-              true
-            )
+            setShowHelp(true)
           }
           className="rounded-full border border-[#174c3c] bg-white px-4 py-2 text-sm font-semibold text-[#174c3c] shadow-sm transition hover:bg-[#eef6f2]"
         >
@@ -346,9 +303,9 @@ function HomeContent() {
 
       </div>
 
-      <div className="mx-auto w-full max-w-md pt-14 sm:pt-10">
+      {/* HEADER */}
 
-        {/* HEADER */}
+      <div className="mx-auto max-w-5xl pt-14 sm:pt-10">
 
         <div className="mb-8 text-center">
 
@@ -367,7 +324,7 @@ function HomeContent() {
 
           </div>
 
-          <h1 className="text-3xl font-bold text-[#174c3c]">
+          <h1 className="text-3xl font-bold text-[#174c3c] sm:text-4xl">
             Salawat Journey
           </h1>
 
@@ -377,272 +334,367 @@ function HomeContent() {
 
         </div>
 
-        {/* MAIN CARD */}
+        {/* 3 COLUMN AREA */}
 
-        <div className="rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-lg sm:p-8">
+        <div className="grid items-start gap-5 lg:grid-cols-[1fr_420px_1fr]">
 
-          {checkingSharedProject ? (
+          {/* LEFT - HADITH */}
 
-            <div className="py-8 text-center">
+          <div className="order-2 lg:order-1">
 
-              <p className="font-medium text-[#174c3c]">
-                Loading project...
+            <div className="rounded-3xl border border-[#d9e4de] bg-[#eef6f2] p-6 shadow-sm">
+
+              <div className="mb-4 flex items-center gap-3">
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#174c3c] text-lg text-white">
+                  ﷺ
+                </div>
+
+                <div>
+
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[#5f7d70]">
+                    Hadith
+                  </p>
+
+                  <h2 className="font-bold text-[#174c3c]">
+                    The Reward of Salawat
+                  </h2>
+
+                </div>
+
+              </div>
+
+              <p
+                dir="rtl"
+                className="text-right text-xl font-medium leading-9 text-gray-900"
+              >
+                مَنْ صَلَّى عَلَيَّ وَاحِدَةً صَلَّى اللَّهُ عَلَيْهِ عَشْرًا
               </p>
+
+              <div className="my-5 h-px bg-[#d5e3dc]" />
+
+              <p className="text-sm leading-7 text-gray-700">
+                “Whoever sends blessings upon me once, Allah will send blessings upon him ten times.”
+              </p>
+
+              <div className="mt-5 rounded-xl bg-white/70 px-4 py-3">
+
+                <p className="text-xs font-semibold text-[#174c3c]">
+                  Sahih Muslim 408
+                </p>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Narrated by Abu Hurairah رضي الله عنه
+                </p>
+
+              </div>
 
             </div>
 
-          ) : sharedProjectFound ? (
+          </div>
 
-            <>
-              {/* SHARED PROJECT */}
+          {/* CENTER - LOGIN */}
 
-              <div className="mb-7 text-center">
+          <div className="order-1 lg:order-2">
 
-                <p className="text-sm font-medium text-[#174c3c]">
-                  You&apos;re joining
+            <div className="rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-lg sm:p-8">
+
+              {checkingSharedProject ? (
+
+                <div className="py-8 text-center">
+
+                  <p className="font-medium text-[#174c3c]">
+                    Loading project...
+                  </p>
+
+                </div>
+
+              ) : sharedProjectFound ? (
+
+                <>
+                  <div className="mb-7 text-center">
+
+                    <p className="text-sm font-medium text-[#174c3c]">
+                      You&apos;re joining
+                    </p>
+
+                    <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                      {projectName}
+                    </h2>
+
+                    <div className="mt-3 inline-flex rounded-full bg-[#f1f7f4] px-4 py-2 text-xs font-semibold text-[#174c3c]">
+                      {projectId}
+                    </div>
+
+                  </div>
+
+                  <div className="mb-6">
+
+                    <label
+                      htmlFor="sharedName"
+                      className="mb-2 block text-sm font-medium text-gray-700"
+                    >
+                      Your Name
+                    </label>
+
+                    <input
+                      id="sharedName"
+                      type="text"
+                      value={name}
+                      onChange={(e) => {
+                        setName(
+                          e.target.value
+                        );
+
+                        setError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (
+                          e.key ===
+                          "Enter"
+                        ) {
+                          handleContinue();
+                        }
+                      }}
+                      placeholder="Enter your name"
+                      autoFocus
+                      className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+                    />
+
+                  </div>
+
+                  {error && (
+
+                    <div className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {error}
+                    </div>
+
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={
+                      handleContinue
+                    }
+                    disabled={
+                      loading
+                    }
+                    className="w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
+                  >
+                    {loading
+                      ? "Joining..."
+                      : "Join Project"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={
+                      joinDifferentProject
+                    }
+                    className="mt-4 w-full text-sm font-medium text-gray-500"
+                  >
+                    Join a different project
+                  </button>
+
+                </>
+
+              ) : (
+
+                <>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Enter Project
+                  </h2>
+
+                  <p className="mb-6 mt-1 text-sm text-gray-500">
+                    Enter your Project ID and your name to continue.
+                  </p>
+
+                  <div className="mb-5">
+
+                    <label
+                      htmlFor="projectId"
+                      className="mb-2 block text-sm font-medium text-gray-700"
+                    >
+                      Project ID
+                    </label>
+
+                    <input
+                      id="projectId"
+                      type="text"
+                      value={projectId}
+                      onChange={(e) => {
+                        setProjectId(
+                          e.target.value.toUpperCase()
+                        );
+
+                        setCopied(false);
+                        setError("");
+                      }}
+                      placeholder="Enter Project ID"
+                      autoCapitalize="characters"
+                      className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+                    />
+
+                  </div>
+
+                  <div className="mb-6">
+
+                    <label
+                      htmlFor="name"
+                      className="mb-2 block text-sm font-medium text-gray-700"
+                    >
+                      Your Name
+                    </label>
+
+                    <input
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => {
+                        setName(
+                          e.target.value
+                        );
+
+                        setError("");
+                      }}
+                      onKeyDown={(e) => {
+                        if (
+                          e.key ===
+                          "Enter"
+                        ) {
+                          handleContinue();
+                        }
+                      }}
+                      placeholder="Enter your name"
+                      className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+                    />
+
+                  </div>
+
+                  {error && (
+
+                    <div className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {error}
+                    </div>
+
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={
+                      handleContinue
+                    }
+                    disabled={
+                      loading
+                    }
+                    className="w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
+                  >
+                    {loading
+                      ? "Finding Project..."
+                      : "Continue"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={
+                      shareProject
+                    }
+                    disabled={
+                      sharing
+                    }
+                    className="mt-3 w-full rounded-xl border border-[#174c3c] py-3.5 font-semibold text-[#174c3c] transition hover:bg-[#f1f7f4] disabled:opacity-60"
+                  >
+                    {sharing
+                      ? "Finding Project..."
+                      : copied
+                      ? "✓ Share Link Copied"
+                      : "Share Project Link"}
+                  </button>
+
+                  <p className="mt-2 text-center text-xs text-gray-400">
+                    Enter a Project ID to copy its shareable link.
+                  </p>
+
+                  <div className="my-7 flex items-center gap-3">
+
+                    <div className="h-px flex-1 bg-gray-200" />
+
+                    <span className="text-xs text-gray-400">
+                      OR
+                    </span>
+
+                    <div className="h-px flex-1 bg-gray-200" />
+
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={
+                      handleCreateProject
+                    }
+                    className="w-full rounded-xl border border-gray-300 py-3.5 font-semibold text-gray-700 transition hover:bg-gray-50"
+                  >
+                    Create a New Project
+                  </button>
+
+                </>
+
+              )}
+
+            </div>
+
+          </div>
+
+          {/* RIGHT - QURAN */}
+
+          <div className="order-3">
+
+            <div className="rounded-3xl border border-[#eadba6] bg-[#fff9e8] p-6 shadow-sm">
+
+              <div className="mb-4 flex items-center gap-3">
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#a37b22] text-lg text-white">
+                  ۞
+                </div>
+
+                <div>
+
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[#967a3d]">
+                    Qur&apos;an
+                  </p>
+
+                  <h2 className="font-bold text-[#7b601e]">
+                    Allah&apos;s Command
+                  </h2>
+
+                </div>
+
+              </div>
+
+              <p
+                dir="rtl"
+                className="text-right text-xl font-medium leading-9 text-gray-900"
+              >
+                إِنَّ اللَّهَ وَمَلَائِكَتَهُ يُصَلُّونَ عَلَى النَّبِيِّ ۚ يَا أَيُّهَا الَّذِينَ آمَنُوا صَلُّوا عَلَيْهِ وَسَلِّمُوا تَسْلِيمًا
+              </p>
+
+              <div className="my-5 h-px bg-[#eadfb8]" />
+
+              <p className="text-sm leading-7 text-gray-700">
+                “Indeed, Allah showers His blessings upon the Prophet, and His angels pray for him. O believers! Invoke Allah&apos;s blessings upon him, and salute him with worthy greetings of peace.”
+              </p>
+
+              <div className="mt-5 rounded-xl bg-white/70 px-4 py-3">
+
+                <p className="text-xs font-semibold text-[#7b601e]">
+                  Surah Al-Ahzab — 33:56
                 </p>
 
-                <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                  {projectName}
-                </h2>
-
-                <div className="mt-3 inline-flex rounded-full bg-[#f1f7f4] px-4 py-2 text-xs font-semibold text-[#174c3c]">
-                  {projectId}
-                </div>
-
               </div>
 
-              <div className="mb-6">
+            </div>
 
-                <label
-                  htmlFor="sharedName"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Your Name
-                </label>
-
-                <input
-                  id="sharedName"
-                  type="text"
-                  value={name}
-                  onChange={(e) => {
-                    setName(
-                      e.target.value
-                    );
-
-                    setError("");
-                  }}
-                  onKeyDown={(e) => {
-                    if (
-                      e.key ===
-                      "Enter"
-                    ) {
-                      handleContinue();
-                    }
-                  }}
-                  placeholder="Enter your name"
-                  autoFocus
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
-                />
-
-              </div>
-
-              {error && (
-
-                <div className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-
-              )}
-
-              <button
-                type="button"
-                onClick={
-                  handleContinue
-                }
-                disabled={
-                  loading
-                }
-                className="w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
-              >
-                {loading
-                  ? "Joining..."
-                  : "Join Project"}
-              </button>
-
-              <button
-                type="button"
-                onClick={
-                  joinDifferentProject
-                }
-                className="mt-4 w-full text-sm font-medium text-gray-500"
-              >
-                Join a different project
-              </button>
-
-            </>
-
-          ) : (
-
-            <>
-              {/* NORMAL PROJECT LOGIN */}
-
-              <h2 className="text-xl font-semibold text-gray-900">
-                Enter Project
-              </h2>
-
-              <p className="mb-6 mt-1 text-sm text-gray-500">
-                Enter your Project ID and your name to continue.
-              </p>
-
-              <div className="mb-5">
-
-                <label
-                  htmlFor="projectId"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Project ID
-                </label>
-
-                <input
-                  id="projectId"
-                  type="text"
-                  value={
-                    projectId
-                  }
-                  onChange={(e) => {
-                    setProjectId(
-                      e.target.value.toUpperCase()
-                    );
-
-                    setCopied(
-                      false
-                    );
-
-                    setError(
-                      ""
-                    );
-                  }}
-                  placeholder="Enter Project ID"
-                  autoCapitalize="characters"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
-                />
-
-              </div>
-
-              <div className="mb-6">
-
-                <label
-                  htmlFor="name"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Your Name
-                </label>
-
-                <input
-                  id="name"
-                  type="text"
-                  value={
-                    name
-                  }
-                  onChange={(e) => {
-                    setName(
-                      e.target.value
-                    );
-
-                    setError(
-                      ""
-                    );
-                  }}
-                  onKeyDown={(e) => {
-                    if (
-                      e.key ===
-                      "Enter"
-                    ) {
-                      handleContinue();
-                    }
-                  }}
-                  placeholder="Enter your name"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
-                />
-
-              </div>
-
-              {error && (
-
-                <div className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-
-              )}
-
-              <button
-                type="button"
-                onClick={
-                  handleContinue
-                }
-                disabled={
-                  loading
-                }
-                className="w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
-              >
-                {loading
-                  ? "Finding Project..."
-                  : "Continue"}
-              </button>
-
-              {/* SHARE PROJECT */}
-
-              <button
-                type="button"
-                onClick={
-                  shareProject
-                }
-                disabled={
-                  sharing
-                }
-                className="mt-3 w-full rounded-xl border border-[#174c3c] py-3.5 font-semibold text-[#174c3c] transition hover:bg-[#f1f7f4] disabled:opacity-60"
-              >
-                {sharing
-                  ? "Finding Project..."
-                  : copied
-                  ? "✓ Share Link Copied"
-                  : "Share Project Link"}
-              </button>
-
-              <p className="mt-2 text-center text-xs text-gray-400">
-                Enter a Project ID to copy its shareable link.
-              </p>
-
-              {/* OR */}
-
-              <div className="my-7 flex items-center gap-3">
-
-                <div className="h-px flex-1 bg-gray-200" />
-
-                <span className="text-xs text-gray-400">
-                  OR
-                </span>
-
-                <div className="h-px flex-1 bg-gray-200" />
-
-              </div>
-
-              {/* CREATE NEW PROJECT */}
-
-              <button
-                type="button"
-                onClick={
-                  handleCreateProject
-                }
-                className="w-full rounded-xl border border-gray-300 py-3.5 font-semibold text-gray-700 transition hover:bg-gray-50"
-              >
-                Create a New Project
-              </button>
-
-            </>
-
-          )}
+          </div>
 
         </div>
 
@@ -655,8 +707,6 @@ function HomeContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
 
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-xl sm:p-7">
-
-            {/* HELP HEADER */}
 
             <div className="flex items-start justify-between gap-4">
 
@@ -675,9 +725,7 @@ function HomeContent() {
               <button
                 type="button"
                 onClick={() =>
-                  setShowHelp(
-                    false
-                  )
+                  setShowHelp(false)
                 }
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f7f3e9] text-xl text-gray-600"
               >
@@ -692,113 +740,33 @@ function HomeContent() {
 
             <div className="mt-6 space-y-4">
 
-              {/* JOIN PROJECT */}
-
               <div className="rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
 
-                <div className="mb-3 flex items-center gap-3">
-
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#174c3c] text-sm font-bold text-white">
-                    1
-                  </div>
-
-                  <p className="font-semibold text-[#174c3c]">
-                    Join an Existing Project
-                  </p>
-
-                </div>
-
-                <p className="text-sm leading-6 text-gray-600">
-                  If someone has already created a Salawat project, ask them for the Project ID or use the project link they shared with you.
+                <p className="font-semibold text-[#174c3c]">
+                  1. Join an Existing Project
                 </p>
 
-                <div className="mt-3 rounded-xl bg-white p-3 text-sm leading-6 text-gray-600">
-
-                  <p>
-                    Enter the <strong>Project ID</strong>.
-                  </p>
-
-                  <p>
-                    Enter <strong>Your Name</strong>.
-                  </p>
-
-                  <p>
-                    Select <strong>Continue</strong>.
-                  </p>
-
-                </div>
-
-                <p className="mt-3 text-sm leading-6 text-gray-600">
-                  If you received a shared project link, the Project ID is selected automatically. You only need to enter your name and select <strong>Join Project</strong>.
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  Enter the Project ID and your name, then select Continue. If you received a shared project link, simply enter your name and select Join Project.
                 </p>
 
               </div>
 
-              {/* CREATE PROJECT */}
-
               <div className="rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
 
-                <div className="mb-3 flex items-center gap-3">
-
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#174c3c] text-sm font-bold text-white">
-                    2
-                  </div>
-
-                  <p className="font-semibold text-[#174c3c]">
-                    Create a New Project
-                  </p>
-
-                </div>
-
-                <p className="text-sm leading-6 text-gray-600">
-                  Select <strong>Create a New Project</strong> at the bottom of the main page.
+                <p className="font-semibold text-[#174c3c]">
+                  2. Create a New Project
                 </p>
 
-                <div className="mt-3 rounded-xl bg-white p-3 text-sm leading-6 text-gray-600">
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  Select Create a New Project and enter the project name, unique Project ID, overall Salawat goal, your name, and an Admin PIN.
+                </p>
 
-                  <p>
-                    <strong>Project Name</strong> — the name participants will see.
-                  </p>
-
-                  <p className="mt-1">
-                    <strong>Project ID</strong> — the unique ID participants use to join.
-                  </p>
-
-                  <p className="mt-1">
-                    <strong>Salawat Goal</strong> — the overall target for the project.
-                  </p>
-
-                  <p className="mt-1">
-                    <strong>Your Name</strong> — the project creator.
-                  </p>
-
-                  <p className="mt-1">
-                    <strong>Admin PIN</strong> — used later to manage the project.
-                  </p>
-
-                </div>
-
-                <p className="mt-3 text-sm font-medium text-[#174c3c]">
+                <p className="mt-2 text-sm font-medium text-[#174c3c]">
                   Keep your Admin PIN private.
                 </p>
 
               </div>
-
-              {/* PROJECT ID */}
-
-              <div className="rounded-2xl bg-[#f7f3e9] p-4">
-
-                <p className="font-semibold text-gray-900">
-                  What is a Project ID?
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  A Project ID uniquely identifies a Salawat project. Participants use it to find and join the correct project.
-                </p>
-
-              </div>
-
-              {/* SHARE */}
 
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
@@ -807,20 +775,10 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  On the main page, enter the Project ID and select <strong>Share Project Link</strong>.
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The project link is copied to your device. You can paste it into WhatsApp, text messages, email, or another app.
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  When someone opens that link, the project is automatically selected. They only need to enter their name.
+                  Enter the Project ID on the main page and select Share Project Link. The link can then be sent through WhatsApp, text, email, or another messaging app.
                 </p>
 
               </div>
-
-              {/* ADD SALAWAT */}
 
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
@@ -829,40 +787,10 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  After joining a project, use one of the quick-add buttons or enter your own amount in the Custom Amount field.
+                  After joining a project, use a quick-add button or enter your own custom amount.
                 </p>
 
               </div>
-
-              {/* DAILY GOAL */}
-
-              <div className="rounded-2xl bg-[#f7f3e9] p-4">
-
-                <p className="font-semibold text-gray-900">
-                  What is the Daily Goal?
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Daily Goal is the daily Salawat target for each participant. The project admin can adjust this target.
-                </p>
-
-              </div>
-
-              {/* PROJECT GOAL */}
-
-              <div className="rounded-2xl bg-[#f7f3e9] p-4">
-
-                <p className="font-semibold text-gray-900">
-                  What is the Project Goal?
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Project Goal is the combined Salawat target for everyone in the project. Every participant&apos;s contribution adds to the project total.
-                </p>
-
-              </div>
-
-              {/* SCORECARD */}
 
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
@@ -871,63 +799,29 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Scorecard shows how much Salawat each participant has contributed to the project. Participants are listed according to their total contributions.
+                  The Scorecard shows everyone&apos;s Salawat contribution and overall community progress.
                 </p>
 
               </div>
 
-              {/* MILESTONES */}
-
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
                 <p className="font-semibold text-gray-900">
-                  What is the Milestone Ladder?
+                  What can the Admin do?
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Milestone Ladder shows the project&apos;s progress through 10%, 25%, 50%, 75%, and 100% of the overall goal.
-                </p>
-
-              </div>
-
-              {/* ADMIN */}
-
-              <div className="rounded-2xl bg-[#f7f3e9] p-4">
-
-                <p className="font-semibold text-gray-900">
-                  What can the project admin do?
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The admin can change the project name, overall goal, daily goal, control participant visibility, and remove incorrect Salawat entries.
-                </p>
-
-              </div>
-
-              {/* WRONG ENTRY */}
-
-              <div className="rounded-2xl bg-[#f7f3e9] p-4">
-
-                <p className="font-semibold text-gray-900">
-                  What if I enter the wrong amount?
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Contact the project admin. The admin can review recent entries and remove an incorrect entry.
+                  The admin can change the project name, project goal, daily goal, participant visibility, and remove incorrect entries.
                 </p>
 
               </div>
 
             </div>
 
-            {/* CLOSE HELP */}
-
             <button
               type="button"
               onClick={() =>
-                setShowHelp(
-                  false
-                )
+                setShowHelp(false)
               }
               className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white"
             >
@@ -949,9 +843,11 @@ export default function HomePage() {
     <Suspense
       fallback={
         <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center">
+
           <p className="font-medium text-[#174c3c]">
             Loading...
           </p>
+
         </main>
       }
     >
