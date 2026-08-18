@@ -18,6 +18,8 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Line,
+  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -54,6 +56,11 @@ type ParticipantTotal = {
 
 type ChartDay = {
   day: string;
+  total: number;
+};
+
+type OverallProgressPoint = {
+  date: string;
   total: number;
 };
 
@@ -164,11 +171,7 @@ function ProjectContent() {
 
     if (entryError) {
       console.error(entryError);
-
-      setError(
-        "Unable to load Salawat entries."
-      );
-
+      setError("Unable to load Salawat entries.");
       setLoading(false);
       return;
     }
@@ -461,6 +464,124 @@ function ProjectContent() {
       return days;
     }, [
       entries,
+      currentTime,
+    ]);
+
+  const myOverallProgressData =
+    useMemo<OverallProgressPoint[]>(() => {
+      if (
+        !currentTime ||
+        myEntries.length === 0
+      ) {
+        return [];
+      }
+
+      const sortedEntries = [
+        ...myEntries,
+      ].sort(
+        (a, b) =>
+          new Date(
+            a.created_at
+          ).getTime() -
+          new Date(
+            b.created_at
+          ).getTime()
+      );
+
+      const firstDate =
+        new Date(
+          sortedEntries[0].created_at
+        );
+
+      firstDate.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const today =
+        new Date(currentTime);
+
+      today.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const dailyTotals =
+        new Map<string, number>();
+
+      sortedEntries.forEach(
+        (entry) => {
+          const entryDate =
+            new Date(
+              entry.created_at
+            );
+
+          const key = [
+            entryDate.getFullYear(),
+            String(
+              entryDate.getMonth() + 1
+            ).padStart(2, "0"),
+            String(
+              entryDate.getDate()
+            ).padStart(2, "0"),
+          ].join("-");
+
+          dailyTotals.set(
+            key,
+            (dailyTotals.get(key) || 0) +
+              Number(entry.amount)
+          );
+        }
+      );
+
+      const data: OverallProgressPoint[] =
+        [];
+
+      let runningTotal = 0;
+
+      const cursor =
+        new Date(firstDate);
+
+      while (
+        cursor <= today
+      ) {
+        const key = [
+          cursor.getFullYear(),
+          String(
+            cursor.getMonth() + 1
+          ).padStart(2, "0"),
+          String(
+            cursor.getDate()
+          ).padStart(2, "0"),
+        ].join("-");
+
+        runningTotal +=
+          dailyTotals.get(key) || 0;
+
+        data.push({
+          date:
+            cursor.toLocaleDateString(
+              "en-US",
+              {
+                month: "short",
+                day: "numeric",
+              }
+            ),
+          total: runningTotal,
+        });
+
+        cursor.setDate(
+          cursor.getDate() + 1
+        );
+      }
+
+      return data;
+    }, [
+      myEntries,
       currentTime,
     ]);
 
@@ -1129,7 +1250,7 @@ function ProjectContent() {
                       value
                     )
                   }
-                  className="rounded-xl border border-[#174c3c] py-3 font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
+                  className="rounded-xl border border-[#174c3c] py-3 font-semibold text-[#174c3c] transition hover:bg-[#eef6f2] disabled:opacity-50"
                 >
                   +{value}
                 </button>
@@ -1391,6 +1512,191 @@ function ProjectContent() {
             )}
 
           </div>
+
+        </div>
+
+        {/* YOUR OVERALL JOURNEY */}
+
+        <div className="mb-5 rounded-3xl border border-[#cfddea] bg-white p-6 shadow-sm">
+
+          <div className="flex items-start justify-between gap-4">
+
+            <div>
+
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#3c6685]">
+                Your Journey
+              </p>
+
+              <h2 className="mt-1 text-xl font-semibold text-gray-900">
+                Overall Salawat Progress
+              </h2>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Your cumulative Salawat progress from your first contribution until today.
+              </p>
+
+            </div>
+
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#edf5fb] text-xl">
+              📈
+            </div>
+
+          </div>
+
+          <div className="mt-5 grid grid-cols-3 gap-2">
+
+            <div className="rounded-2xl bg-[#eaf7f0] p-3 text-center">
+
+              <p className="text-xs text-[#56806b]">
+                Today
+              </p>
+
+              <p className="mt-1 font-bold text-[#174c3c]">
+                {todayTotal.toLocaleString()}
+              </p>
+
+            </div>
+
+            <div className="rounded-2xl bg-[#fff7dc] p-3 text-center">
+
+              <p className="text-xs text-[#8b7b46]">
+                7 Days
+              </p>
+
+              <p className="mt-1 font-bold text-[#7a6115]">
+                {myLast7DaysTotal.toLocaleString()}
+              </p>
+
+            </div>
+
+            <div className="rounded-2xl bg-[#edf5fb] p-3 text-center">
+
+              <p className="text-xs text-[#628197]">
+                Overall
+              </p>
+
+              <p className="mt-1 font-bold text-[#265575]">
+                {myTotal.toLocaleString()}
+              </p>
+
+            </div>
+
+          </div>
+
+          {myOverallProgressData.length >
+          0 ? (
+
+            <div className="mt-7 h-72">
+
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+
+                <LineChart
+                  data={
+                    myOverallProgressData
+                  }
+                  margin={{
+                    top: 10,
+                    right: 10,
+                    left: 0,
+                    bottom: 5,
+                  }}
+                >
+
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                  />
+
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    minTickGap={30}
+                    tick={{
+                      fontSize: 11,
+                    }}
+                  />
+
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    width={55}
+                    tickFormatter={(
+                      value
+                    ) =>
+                      Number(
+                        value
+                      ).toLocaleString()
+                    }
+                  />
+
+                  <Tooltip
+                    formatter={(
+                      value
+                    ) => [
+                      Number(
+                        value
+                      ).toLocaleString(),
+                      "Total Salawat",
+                    ]}
+                  />
+
+                  <Line
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#265575"
+                    strokeWidth={4}
+                    dot={false}
+                    activeDot={{
+                      r: 6,
+                    }}
+                  />
+
+                </LineChart>
+
+              </ResponsiveContainer>
+
+            </div>
+
+          ) : (
+
+            <div className="mt-6 rounded-2xl bg-[#f7f3e9] p-8 text-center">
+
+              <div className="text-3xl">
+                🌱
+              </div>
+
+              <p className="mt-3 font-semibold text-gray-800">
+                Your journey starts here
+              </p>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Add your first Salawat to begin your progress graph.
+              </p>
+
+            </div>
+
+          )}
+
+          {myOverallProgressData.length >
+            0 && (
+
+            <div className="mt-4 rounded-2xl bg-[#f7f3e9] px-4 py-3 text-center">
+
+              <p className="text-sm text-gray-500">
+                Your Salawat journey
+              </p>
+
+              <p className="mt-1 font-semibold text-[#174c3c]">
+                {myTotal.toLocaleString()} Salawat and counting ✨
+              </p>
+
+            </div>
+
+          )}
 
         </div>
 
