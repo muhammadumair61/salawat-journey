@@ -254,6 +254,33 @@ function ProjectContent() {
         );
     }, [myEntries, currentTime]);
 
+  const communityTodayTotal =
+    useMemo(() => {
+      if (!currentTime) {
+        return 0;
+      }
+
+      return entries
+        .filter((entry) => {
+          const entryDate =
+            new Date(entry.created_at);
+
+          return (
+            entryDate.getFullYear() ===
+              currentTime.getFullYear() &&
+            entryDate.getMonth() ===
+              currentTime.getMonth() &&
+            entryDate.getDate() ===
+              currentTime.getDate()
+          );
+        })
+        .reduce(
+          (sum, entry) =>
+            sum + Number(entry.amount),
+          0
+        );
+    }, [entries, currentTime]);
+
   const myLast7DaysTotal =
     useMemo(() => {
       if (!currentTime) {
@@ -293,13 +320,13 @@ function ProjectContent() {
 
   const dailyPercentage =
     Math.min(
-      (todayTotal / dailyGoal) * 100,
+      (communityTodayTotal / dailyGoal) * 100,
       100
     );
 
   const dailyRemaining =
     Math.max(
-      dailyGoal - todayTotal,
+      dailyGoal - communityTodayTotal,
       0
     );
 
@@ -325,8 +352,6 @@ function ProjectContent() {
           0
         )
       : 0;
-
-  /* PROJECT GOAL STATUS */
 
   const progressStatus =
     useMemo(() => {
@@ -699,10 +724,6 @@ function ProjectContent() {
         ];
       }
 
-      /*
-       * If the project exceeds its goal,
-       * the completed ring stays at 100%.
-       */
       const goal =
         Number(project.goal);
 
@@ -732,56 +753,6 @@ function ProjectContent() {
       project,
       total,
     ]);
-
-  const milestones =
-    useMemo(() => {
-      if (!project) {
-        return [];
-      }
-
-      const goal =
-        Number(project.goal);
-
-      return [
-        {
-          percent: 10,
-          label: "Getting Started",
-          amount:
-            Math.round(
-              goal * 0.1
-            ),
-        },
-        {
-          percent: 25,
-          label: "Building Momentum",
-          amount:
-            Math.round(
-              goal * 0.25
-            ),
-        },
-        {
-          percent: 50,
-          label: "Halfway",
-          amount:
-            Math.round(
-              goal * 0.5
-            ),
-        },
-        {
-          percent: 75,
-          label: "Almost There",
-          amount:
-            Math.round(
-              goal * 0.75
-            ),
-        },
-        {
-          percent: 100,
-          label: "Project Goal",
-          amount: goal,
-        },
-      ];
-    }, [project]);
 
   function askQuickAddConfirmation(
     value: number
@@ -889,11 +860,9 @@ function ProjectContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
-
         <p className="font-medium text-[#174c3c]">
           Loading Salawat project...
         </p>
-
       </main>
     );
   }
@@ -1015,13 +984,10 @@ function ProjectContent() {
           </p>
 
           <p className="mt-2 text-sm text-gray-500">
-
             Project ID:{" "}
-
             <span className="font-semibold text-[#174c3c]">
               {project.project_code}
             </span>
-
           </p>
 
         </div>
@@ -1035,8 +1001,6 @@ function ProjectContent() {
               : "border-[#e5ded0]"
           }`}
         >
-
-          {/* GOAL HEADER */}
 
           <div className="text-center">
 
@@ -1064,8 +1028,6 @@ function ProjectContent() {
 
           <div className="relative mx-auto mt-4 h-72 w-72 max-w-full">
 
-            {/* SOFT OUTER GLOW */}
-
             <div
               className={`absolute inset-[30px] rounded-full blur-2xl ${
                 percentage >= 100
@@ -1082,9 +1044,7 @@ function ProjectContent() {
               <PieChart>
 
                 <Pie
-                  data={
-                    goalChartData
-                  }
+                  data={goalChartData}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -1119,22 +1079,18 @@ function ProjectContent() {
 
             </ResponsiveContainer>
 
-            {/* CENTER CONTENT */}
+            {/* CENTER */}
 
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-
-              {/* WATERMARK */}
 
               <span className="absolute text-8xl text-[#174c3c]/[0.035]">
                 ﷺ
               </span>
 
               {percentage >= 100 && (
-
                 <div className="mb-1 text-2xl">
                   🎉
                 </div>
-
               )}
 
               <p
@@ -1167,7 +1123,7 @@ function ProjectContent() {
 
           </div>
 
-          {/* DYNAMIC MESSAGE */}
+          {/* STATUS */}
 
           <div
             className={`mx-auto -mt-1 max-w-sm rounded-2xl px-5 py-4 text-center ${
@@ -1255,11 +1211,7 @@ function ProjectContent() {
 
             <div className="relative">
 
-              {/* BACKGROUND TRACK */}
-
               <div className="absolute left-5 right-5 top-4 h-1 rounded-full bg-gray-200" />
-
-              {/* ACTIVE TRACK */}
 
               <div
                 className="absolute left-5 top-4 h-1 rounded-full bg-[#174c3c] transition-all duration-1000"
@@ -1290,9 +1242,7 @@ function ProjectContent() {
 
                     return (
                       <div
-                        key={
-                          milestone
-                        }
+                        key={milestone}
                         className="flex flex-col items-center"
                       >
 
@@ -1305,11 +1255,9 @@ function ProjectContent() {
                               : "border-gray-300 bg-white text-gray-400"
                           }`}
                         >
-
                           {reached
                             ? "✓"
                             : milestone}
-
                         </div>
 
                         <p
@@ -1346,8 +1294,6 @@ function ProjectContent() {
 
           <div className="mt-7 grid grid-cols-3 gap-2">
 
-            {/* COMPLETED */}
-
             <div className="rounded-2xl bg-[#eaf7f0] p-3 text-center sm:p-4">
 
               <p className="text-[11px] font-medium text-[#56806b] sm:text-xs">
@@ -1360,8 +1306,6 @@ function ProjectContent() {
 
             </div>
 
-            {/* REMAINING */}
-
             <div className="rounded-2xl bg-[#fff7dc] p-3 text-center sm:p-4">
 
               <p className="text-[11px] font-medium text-[#8b7b46] sm:text-xs">
@@ -1373,8 +1317,6 @@ function ProjectContent() {
               </p>
 
             </div>
-
-            {/* NEXT */}
 
             <div className="rounded-2xl bg-[#edf5fb] p-3 text-center sm:p-4">
 
@@ -1396,7 +1338,7 @@ function ProjectContent() {
 
         </div>
 
-        {/* DAILY GOAL */}
+        {/* COMMUNITY DAILY GOAL */}
 
         <div className="mb-5 rounded-3xl bg-[#174c3c] p-6 text-white shadow-sm">
 
@@ -1405,17 +1347,17 @@ function ProjectContent() {
             <div>
 
               <p className="text-sm text-white/70">
-                Your Daily Goal
+                Community&apos;s Daily Goal
               </p>
 
               <p className="mt-1 text-3xl font-bold">
-                {todayTotal.toLocaleString()}
+                {communityTodayTotal.toLocaleString()}
               </p>
 
               <p className="mt-1 text-sm text-white/70">
                 of{" "}
                 {dailyGoal.toLocaleString()}{" "}
-                Salawat
+                Salawat today
               </p>
 
             </div>
@@ -1440,8 +1382,8 @@ function ProjectContent() {
           <p className="mt-3 text-sm text-white/70">
 
             {dailyRemaining === 0
-              ? "✓ Daily goal completed!"
-              : `${dailyRemaining.toLocaleString()} remaining today`}
+              ? "✓ Community daily goal completed!"
+              : `${dailyRemaining.toLocaleString()} Salawat remaining today`}
 
           </p>
 
@@ -1664,19 +1606,15 @@ function ProjectContent() {
           />
 
           {error && (
-
             <p className="mt-3 text-sm text-red-600">
               {error}
             </p>
-
           )}
 
           {success && (
-
             <p className="mt-3 text-sm font-medium text-green-700">
               ✓ {success}
             </p>
-
           )}
 
           <button
@@ -1766,140 +1704,6 @@ function ProjectContent() {
                 Loading activity...
               </div>
 
-            )}
-
-          </div>
-
-        </div>
-
-        {/* MILESTONES */}
-
-        <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-sm">
-
-          <h2 className="text-xl font-semibold text-gray-900">
-            Project Milestone Ladder
-          </h2>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Every step brings the project closer to its goal.
-          </p>
-
-          <div className="mt-6">
-
-            {milestones.map(
-              (
-                milestone,
-                index
-              ) => {
-
-                const reached =
-                  total >=
-                  milestone.amount;
-
-                const previousAmount =
-                  index === 0
-                    ? 0
-                    : milestones[
-                        index - 1
-                      ].amount;
-
-                const current =
-                  !reached &&
-                  total >=
-                    previousAmount;
-
-                return (
-                  <div
-                    key={
-                      milestone.percent
-                    }
-                    className="relative flex gap-4 pb-6 last:pb-0"
-                  >
-
-                    {index <
-                      milestones.length -
-                        1 && (
-
-                      <div
-                        className={`absolute left-[17px] top-9 h-full w-0.5 ${
-                          reached
-                            ? "bg-[#174c3c]"
-                            : "bg-gray-200"
-                        }`}
-                      />
-
-                    )}
-
-                    <div
-                      className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold ${
-                        reached
-                          ? "border-[#174c3c] bg-[#174c3c] text-white"
-                          : current
-                          ? "border-[#174c3c] bg-white text-[#174c3c]"
-                          : "border-gray-300 bg-white text-gray-400"
-                      }`}
-                    >
-                      {reached
-                        ? "✓"
-                        : index + 1}
-                    </div>
-
-                    <div
-                      className={`flex-1 rounded-2xl p-4 ${
-                        current
-                          ? "border border-[#174c3c] bg-[#f4f8f6]"
-                          : "bg-[#f7f3e9]"
-                      }`}
-                    >
-
-                      <div className="flex items-start justify-between gap-3">
-
-                        <div>
-
-                          <p className="font-semibold text-gray-900">
-                            {milestone.label}
-                          </p>
-
-                          <p className="mt-1 text-sm text-gray-500">
-                            {milestone.percent}% of project goal
-                          </p>
-
-                        </div>
-
-                        <p className="font-bold text-gray-900">
-                          {milestone.amount.toLocaleString()}
-                        </p>
-
-                      </div>
-
-                      {current && (
-
-                        <p className="mt-3 text-sm font-medium text-[#174c3c]">
-
-                          {Math.max(
-                            milestone.amount -
-                              total,
-                            0
-                          ).toLocaleString()}{" "}
-                          Salawat to reach this milestone
-
-                        </p>
-
-                      )}
-
-                      {reached && (
-
-                        <p className="mt-3 text-sm font-medium text-[#174c3c]">
-                          ✓ Milestone reached
-                        </p>
-
-                      )}
-
-                    </div>
-
-                  </div>
-                );
-              }
             )}
 
           </div>
@@ -2200,8 +2004,6 @@ function ProjectContent() {
 
                   <div className="grid grid-cols-3 items-end gap-2">
 
-                    {/* SECOND */}
-
                     <div className="text-center">
 
                       <div className="mb-2 text-3xl">
@@ -2216,18 +2018,14 @@ function ProjectContent() {
                         </p>
 
                         <p className="mt-1 text-sm font-bold text-[#174c3c]">
-
                           {participantTotals[1]
                             ? participantTotals[1].total.toLocaleString()
                             : "—"}
-
                         </p>
 
                       </div>
 
                     </div>
-
-                    {/* FIRST */}
 
                     <div className="text-center">
 
@@ -2243,18 +2041,14 @@ function ProjectContent() {
                         </p>
 
                         <p className="mt-1 text-lg font-bold">
-
                           {participantTotals[0]
                             ? participantTotals[0].total.toLocaleString()
                             : "—"}
-
                         </p>
 
                       </div>
 
                     </div>
-
-                    {/* THIRD */}
 
                     <div className="text-center">
 
@@ -2270,11 +2064,9 @@ function ProjectContent() {
                         </p>
 
                         <p className="mt-1 text-sm font-bold text-[#174c3c]">
-
                           {participantTotals[2]
                             ? participantTotals[2].total.toLocaleString()
                             : "—"}
-
                         </p>
 
                       </div>
@@ -2389,14 +2181,12 @@ function ProjectContent() {
                   </h3>
 
                   <span className="text-xs text-gray-400">
-
                     {participantTotals.length}{" "}
                     participant
                     {participantTotals.length ===
                     1
                       ? ""
                       : "s"}
-
                   </span>
 
                 </div>
@@ -2454,22 +2244,17 @@ function ProjectContent() {
                               <div className="min-w-0">
 
                                 <p className="truncate font-semibold text-gray-900">
-
                                   {participant.name}
-
                                   {isMe
                                     ? " (You)"
                                     : ""}
-
                                 </p>
 
                                 <p className="mt-1 text-xs text-gray-500">
-
                                   {participantPercentage.toFixed(
                                     1
                                   )}
                                   % of project total
-
                                 </p>
 
                               </div>
