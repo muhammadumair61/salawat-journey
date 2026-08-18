@@ -69,13 +69,8 @@ function HomeContent() {
         return;
       }
 
-      setProjectId(
-        cleanProjectId
-      );
-
-      setCheckingSharedProject(
-        true
-      );
+      setProjectId(cleanProjectId);
+      setCheckingSharedProject(true);
 
       const {
         data,
@@ -91,14 +86,10 @@ function HomeContent() {
         )
         .maybeSingle();
 
-      setCheckingSharedProject(
-        false
-      );
+      setCheckingSharedProject(false);
 
       if (projectError) {
-        console.error(
-          projectError
-        );
+        console.error(projectError);
 
         setError(
           "Unable to load the shared project."
@@ -119,9 +110,7 @@ function HomeContent() {
         data.project_name
       );
 
-      setSharedProjectFound(
-        true
-      );
+      setSharedProjectFound(true);
     }
 
     loadSharedProject();
@@ -156,9 +145,7 @@ function HomeContent() {
       return;
     }
 
-    setLoading(
-      true
-    );
+    setLoading(true);
 
     const {
       data,
@@ -174,14 +161,10 @@ function HomeContent() {
       )
       .maybeSingle();
 
-    setLoading(
-      false
-    );
+    setLoading(false);
 
     if (projectError) {
-      console.error(
-        projectError
-      );
+      console.error(projectError);
 
       setError(
         "Unable to connect. Please try again."
@@ -224,9 +207,7 @@ function HomeContent() {
       return;
     }
 
-    setSharing(
-      true
-    );
+    setSharing(true);
 
     const {
       data,
@@ -242,14 +223,10 @@ function HomeContent() {
       )
       .maybeSingle();
 
-    setSharing(
-      false
-    );
+    setSharing(false);
 
     if (projectError) {
-      console.error(
-        projectError
-      );
+      console.error(projectError);
 
       setError(
         "Unable to find the project."
@@ -276,15 +253,11 @@ function HomeContent() {
         projectLink
       );
 
-      setCopied(
-        true
-      );
+      setCopied(true);
 
       window.setTimeout(
         () => {
-          setCopied(
-            false
-          );
+          setCopied(false);
         },
         2500
       );
@@ -304,41 +277,31 @@ function HomeContent() {
   function joinDifferentProject() {
     router.push("/");
 
-    setSharedProjectFound(
-      false
-    );
-
+    setSharedProjectFound(false);
     setProjectName("");
-
     setProjectId("");
-
     setName("");
-
     setError("");
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3e9] px-5 py-10">
+    <main className="relative min-h-screen bg-[#f7f3e9] px-5 py-10">
 
-      <div className="mx-auto w-full max-w-md">
+      {/* HOW TO USE - TOP RIGHT */}
 
-        {/* HOW TO USE */}
+      <div className="absolute right-5 top-5 sm:right-8 sm:top-7">
+        <button
+          type="button"
+          onClick={() =>
+            setShowHelp(true)
+          }
+          className="rounded-full border border-[#174c3c] bg-white px-4 py-2 text-sm font-semibold text-[#174c3c] shadow-sm transition hover:bg-[#eef6f2]"
+        >
+          How to Use ?
+        </button>
+      </div>
 
-        <div className="mb-5 flex justify-end">
-
-          <button
-            type="button"
-            onClick={() =>
-              setShowHelp(
-                true
-              )
-            }
-            className="rounded-full border border-[#174c3c] bg-white px-4 py-2 text-sm font-semibold text-[#174c3c] shadow-sm transition hover:bg-[#eef6f2]"
-          >
-            ? How to Use
-          </button>
-
-        </div>
+      <div className="mx-auto w-full max-w-md pt-14 sm:pt-10">
 
         {/* HEADER */}
 
@@ -352,11 +315,9 @@ function HomeContent() {
           </p>
 
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#174c3c] shadow-md">
-
             <span className="text-4xl text-white">
               ﷺ
             </span>
-
           </div>
 
           <h1 className="text-3xl font-bold text-[#174c3c]">
@@ -376,18 +337,14 @@ function HomeContent() {
           {checkingSharedProject ? (
 
             <div className="py-8 text-center">
-
               <p className="font-medium text-[#174c3c]">
                 Loading project...
               </p>
-
             </div>
 
           ) : sharedProjectFound ? (
 
             <>
-              {/* SHARED PROJECT */}
-
               <div className="mb-7 text-center">
 
                 <p className="text-sm font-medium text-[#174c3c]">
@@ -426,8 +383,7 @@ function HomeContent() {
                   }}
                   onKeyDown={(e) => {
                     if (
-                      e.key ===
-                      "Enter"
+                      e.key === "Enter"
                     ) {
                       handleContinue();
                     }
@@ -477,8 +433,6 @@ function HomeContent() {
           ) : (
 
             <>
-              {/* NORMAL LOGIN */}
-
               <h2 className="text-xl font-semibold text-gray-900">
                 Enter Project
               </h2>
@@ -499,18 +453,14 @@ function HomeContent() {
                 <input
                   id="projectId"
                   type="text"
-                  value={
-                    projectId
-                  }
+                  value={projectId}
                   onChange={(e) => {
-
                     setProjectId(
                       e.target.value.toUpperCase()
                     );
 
                     setCopied(false);
                     setError("");
-
                   }}
                   placeholder="Enter Project ID"
                   autoCapitalize="characters"
@@ -533,23 +483,18 @@ function HomeContent() {
                   type="text"
                   value={name}
                   onChange={(e) => {
-
                     setName(
                       e.target.value
                     );
 
                     setError("");
-
                   }}
                   onKeyDown={(e) => {
-
                     if (
-                      e.key ===
-                      "Enter"
+                      e.key === "Enter"
                     ) {
                       handleContinue();
                     }
-
                   }}
                   placeholder="Enter your name"
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
@@ -579,8 +524,6 @@ function HomeContent() {
                   ? "Finding Project..."
                   : "Continue"}
               </button>
-
-              {/* SHARE */}
 
               <button
                 type="button"
@@ -615,8 +558,6 @@ function HomeContent() {
 
               </div>
 
-              {/* CREATE */}
-
               <button
                 type="button"
                 onClick={
@@ -643,8 +584,6 @@ function HomeContent() {
 
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-xl sm:p-7">
 
-            {/* MODAL HEADER */}
-
             <div className="flex items-start justify-between gap-4">
 
               <div>
@@ -662,9 +601,7 @@ function HomeContent() {
               <button
                 type="button"
                 onClick={() =>
-                  setShowHelp(
-                    false
-                  )
+                  setShowHelp(false)
                 }
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f7f3e9] text-xl text-gray-600"
               >
@@ -679,11 +616,11 @@ function HomeContent() {
 
             <div className="mt-6 space-y-4">
 
-              {/* JOIN */}
+              {/* JOIN EXISTING */}
 
               <div className="rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
 
-                <div className="mb-2 flex items-center gap-3">
+                <div className="mb-3 flex items-center gap-3">
 
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#174c3c] text-sm font-bold text-white">
                     1
@@ -696,36 +633,36 @@ function HomeContent() {
                 </div>
 
                 <p className="text-sm leading-6 text-gray-600">
-                  If someone has already created a Salawat project, ask them for the Project ID or the shared project link.
+                  If someone has already created a Salawat project, ask them for the Project ID or use the project link they shared with you.
                 </p>
 
-                <div className="mt-3 rounded-xl bg-white p-3">
+                <div className="mt-3 rounded-xl bg-white p-3 text-sm leading-6 text-gray-600">
 
-                  <p className="text-sm text-gray-600">
-                    Enter:
+                  <p>
+                    Enter the <strong>Project ID</strong>.
                   </p>
 
-                  <p className="mt-1 text-sm font-medium text-gray-900">
-                    • Project ID
+                  <p>
+                    Enter <strong>Your Name</strong>.
                   </p>
 
-                  <p className="text-sm font-medium text-gray-900">
-                    • Your Name
-                  </p>
-
-                  <p className="mt-2 text-sm text-gray-600">
-                    Then select <strong>Continue</strong>.
+                  <p>
+                    Select <strong>Continue</strong>.
                   </p>
 
                 </div>
 
+                <p className="mt-3 text-sm leading-6 text-gray-600">
+                  If you received a shared project link, the Project ID is selected automatically. You only need to enter your name and select <strong>Join Project</strong>.
+                </p>
+
               </div>
 
-              {/* CREATE */}
+              {/* CREATE NEW */}
 
               <div className="rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
 
-                <div className="mb-2 flex items-center gap-3">
+                <div className="mb-3 flex items-center gap-3">
 
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#174c3c] text-sm font-bold text-white">
                     2
@@ -741,30 +678,26 @@ function HomeContent() {
                   Select <strong>Create a New Project</strong> at the bottom of the main page.
                 </p>
 
-                <p className="mt-3 text-sm leading-6 text-gray-600">
-                  You will enter:
-                </p>
-
-                <div className="mt-2 rounded-xl bg-white p-3 text-sm leading-6 text-gray-600">
+                <div className="mt-3 rounded-xl bg-white p-3 text-sm leading-6 text-gray-600">
 
                   <p>
-                    • <strong>Project Name</strong> — the name everyone will see.
+                    <strong>Project Name</strong> — the name participants will see.
                   </p>
 
                   <p>
-                    • <strong>Project ID</strong> — the unique ID people use to join.
+                    <strong>Project ID</strong> — the unique ID participants use to join.
                   </p>
 
                   <p>
-                    • <strong>Salawat Goal</strong> — the overall target for the project.
+                    <strong>Salawat Goal</strong> — the overall target for the project.
                   </p>
 
                   <p>
-                    • <strong>Your Name</strong> — the project creator/admin.
+                    <strong>Your Name</strong> — the project creator.
                   </p>
 
                   <p>
-                    • <strong>Admin PIN</strong> — used to manage the project later.
+                    <strong>Admin PIN</strong> — used later to manage the project.
                   </p>
 
                 </div>
@@ -784,29 +717,25 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Project ID identifies your Salawat project. Participants use it to find and join the correct project.
+                  A Project ID uniquely identifies a Salawat project. Participants use it to find and join the correct project.
                 </p>
 
               </div>
 
-              {/* SHARING */}
+              {/* SHARE */}
 
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
                 <p className="font-semibold text-gray-900">
-                  How do I invite someone?
+                  How do I share a project?
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Enter the Project ID on the main page and select <strong>Share Project Link</strong>.
+                  On the main page, enter the Project ID and select <strong>Share Project Link</strong>.
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The website copies a link that you can send through WhatsApp, text, email, or any other messaging app.
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  When someone opens the shared link, the project is already selected. They only need to enter their name and select <strong>Join Project</strong>.
+                  The project link is copied to your device. You can paste it into WhatsApp, text messages, email, or another app.
                 </p>
 
               </div>
@@ -820,12 +749,12 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  After joining a project, use the quick-add buttons such as +10, +33, +100, +500, or +1,000. You can also enter a custom amount.
+                  After joining a project, select one of the quick-add amounts or enter your own number in the Custom Amount field.
                 </p>
 
               </div>
 
-              {/* DAILY GOAL */}
+              {/* DAILY */}
 
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
@@ -834,7 +763,7 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Daily Goal is the Salawat target for each participant. The project admin can adjust this goal.
+                  The Daily Goal is the daily Salawat target shown to each participant. The project admin can change this goal.
                 </p>
 
               </div>
@@ -848,7 +777,7 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Project Goal is the combined target for everyone in the project. Every participant&apos;s Salawat contributes toward reaching it.
+                  The Project Goal is the combined Salawat target for the whole project. Every participant&apos;s contribution adds to the project total.
                 </p>
 
               </div>
@@ -862,7 +791,7 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The Milestone Ladder shows the project&apos;s progress through important checkpoints at 10%, 25%, 50%, 75%, and 100% of the overall goal.
+                  The Milestone Ladder shows the project&apos;s progress at 10%, 25%, 50%, 75%, and 100% of the overall goal.
                 </p>
 
               </div>
@@ -872,11 +801,11 @@ function HomeContent() {
               <div className="rounded-2xl bg-[#f7f3e9] p-4">
 
                 <p className="font-semibold text-gray-900">
-                  What can the Admin do?
+                  What can the project admin do?
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  The project admin can use the Admin PIN to change the project name, overall goal, daily goal, control participant visibility, and remove incorrect Salawat entries.
+                  The admin can change the project name, overall goal, daily goal, control participant visibility, and remove incorrect Salawat entries.
                 </p>
 
               </div>
@@ -890,7 +819,7 @@ function HomeContent() {
                 </p>
 
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Contact the project admin. The admin can review recent entries and remove the incorrect entry.
+                  Contact the project admin. The admin can review recent entries and remove an incorrect entry.
                 </p>
 
               </div>
@@ -900,9 +829,7 @@ function HomeContent() {
             <button
               type="button"
               onClick={() =>
-                setShowHelp(
-                  false
-                )
+                setShowHelp(false)
               }
               className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white"
             >
@@ -924,11 +851,9 @@ export default function HomePage() {
     <Suspense
       fallback={
         <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center">
-
           <p className="font-medium text-[#174c3c]">
             Loading...
           </p>
-
         </main>
       }
     >
