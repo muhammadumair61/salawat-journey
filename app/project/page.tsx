@@ -17,13 +17,13 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 
 import { supabase } from "@/lib/supabase/client";
@@ -118,10 +118,7 @@ function ProjectContent() {
       .select(
         "id, project_code, project_name, goal, daily_goal, created_by, created_at, show_participants"
       )
-      .eq(
-        "project_code",
-        projectCode
-      )
+      .eq("project_code", projectCode)
       .maybeSingle();
 
     if (projectError) {
@@ -160,47 +157,39 @@ function ProjectContent() {
       .select(
         "id, project_id, participant_name, amount, created_at"
       )
-      .eq(
-        "project_id",
-        cleanProject.id
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false,
-        }
-      );
+      .eq("project_id", cleanProject.id)
+      .order("created_at", {
+        ascending: false,
+      });
 
     if (entryError) {
       console.error(entryError);
-      setError("Unable to load Salawat entries.");
+
+      setError(
+        "Unable to load Salawat entries."
+      );
+
       setLoading(false);
       return;
     }
 
     const cleanEntries: SalawatEntry[] =
-      (entryData || []).map(
-        (entry) => ({
-          id: Number(entry.id),
-          project_id: entry.project_id,
-          participant_name: entry.participant_name,
-          amount: Number(entry.amount),
-          created_at: entry.created_at,
-        })
-      );
+      (entryData || []).map((entry) => ({
+        id: Number(entry.id),
+        project_id: entry.project_id,
+        participant_name:
+          entry.participant_name,
+        amount: Number(entry.amount),
+        created_at: entry.created_at,
+      }));
 
     setEntries(cleanEntries);
     setLoading(false);
-  }, [
-    projectCode,
-    router,
-  ]);
+  }, [projectCode, router]);
 
   useEffect(() => {
     loadProject();
-  }, [
-    loadProject,
-  ]);
+  }, [loadProject]);
 
   const total =
     useMemo(() => {
@@ -209,9 +198,7 @@ function ProjectContent() {
           sum + Number(entry.amount),
         0
       );
-    }, [
-      entries,
-    ]);
+    }, [entries]);
 
   const myEntries =
     useMemo(() => {
@@ -224,10 +211,7 @@ function ProjectContent() {
             .trim()
             .toLowerCase()
       );
-    }, [
-      entries,
-      userName,
-    ]);
+    }, [entries, userName]);
 
   const myTotal =
     useMemo(() => {
@@ -236,9 +220,7 @@ function ProjectContent() {
           sum + Number(entry.amount),
         0
       );
-    }, [
-      myEntries,
-    ]);
+    }, [myEntries]);
 
   const todayTotal =
     useMemo(() => {
@@ -265,10 +247,7 @@ function ProjectContent() {
             sum + Number(entry.amount),
           0
         );
-    }, [
-      myEntries,
-      currentTime,
-    ]);
+    }, [myEntries, currentTime]);
 
   const myLast7DaysTotal =
     useMemo(() => {
@@ -295,20 +274,14 @@ function ProjectContent() {
           const entryDate =
             new Date(entry.created_at);
 
-          return (
-            entryDate >=
-            sevenDaysAgo
-          );
+          return entryDate >= sevenDaysAgo;
         })
         .reduce(
           (sum, entry) =>
             sum + Number(entry.amount),
           0
         );
-    }, [
-      myEntries,
-      currentTime,
-    ]);
+    }, [myEntries, currentTime]);
 
   const dailyGoal =
     Number(project?.daily_goal) || 100;
@@ -335,13 +308,11 @@ function ProjectContent() {
       }
 
       return Math.min(
-        (total / Number(project.goal)) * 100,
+        (total / Number(project.goal)) *
+          100,
         100
       );
-    }, [
-      total,
-      project,
-    ]);
+    }, [total, project]);
 
   const remaining =
     project
@@ -376,13 +347,10 @@ function ProjectContent() {
           existing.total +=
             Number(entry.amount);
         } else {
-          totals.set(
-            key,
-            {
-              name: cleanName,
-              total: Number(entry.amount),
-            }
-          );
+          totals.set(key, {
+            name: cleanName,
+            total: Number(entry.amount),
+          });
         }
       });
 
@@ -392,9 +360,38 @@ function ProjectContent() {
         (a, b) =>
           b.total - a.total
       );
+    }, [entries]);
+
+  const myRank =
+    useMemo(() => {
+      const rank =
+        participantTotals.findIndex(
+          (participant) =>
+            participant.name
+              .trim()
+              .toLowerCase() ===
+            userName
+              .trim()
+              .toLowerCase()
+        );
+
+      return rank >= 0
+        ? rank + 1
+        : null;
     }, [
-      entries,
+      participantTotals,
+      userName,
     ]);
+
+  const scorecardChartData =
+    useMemo(() => {
+      return participantTotals
+        .slice(0, 10)
+        .map((participant) => ({
+          name: participant.name,
+          total: participant.total,
+        }));
+    }, [participantTotals]);
 
   const chartData =
     useMemo<ChartDay[]>(() => {
@@ -402,8 +399,7 @@ function ProjectContent() {
         return [];
       }
 
-      const days: ChartDay[] =
-        [];
+      const days: ChartDay[] = [];
 
       for (
         let i = 6;
@@ -512,7 +508,8 @@ function ProjectContent() {
       return [
         {
           percent: 10,
-          label: "Getting Started",
+          label:
+            "Getting Started",
           amount:
             Math.round(
               goal * 0.1
@@ -520,7 +517,8 @@ function ProjectContent() {
         },
         {
           percent: 25,
-          label: "Building Momentum",
+          label:
+            "Building Momentum",
           amount:
             Math.round(
               goal * 0.25
@@ -548,9 +546,7 @@ function ProjectContent() {
           amount: goal,
         },
       ];
-    }, [
-      project,
-    ]);
+    }, [project]);
 
   function askQuickAddConfirmation(
     value: number
@@ -574,7 +570,9 @@ function ProjectContent() {
         : Number(amount);
 
     if (
-      !Number.isFinite(salawatAmount) ||
+      !Number.isFinite(
+        salawatAmount
+      ) ||
       salawatAmount <= 0
     ) {
       setError(
@@ -592,9 +590,12 @@ function ProjectContent() {
     } = await supabase
       .from("salawat_entries")
       .insert({
-        project_id: project.id,
-        participant_name: userName,
-        amount: salawatAmount,
+        project_id:
+          project.id,
+        participant_name:
+          userName,
+        amount:
+          salawatAmount,
       })
       .select(
         "id, project_id, participant_name, amount, created_at"
@@ -604,7 +605,9 @@ function ProjectContent() {
     setAdding(false);
 
     if (insertError) {
-      console.error(insertError);
+      console.error(
+        insertError
+      );
 
       setError(
         "Unable to save your Salawat. Please try again."
@@ -615,10 +618,14 @@ function ProjectContent() {
 
     const cleanEntry: SalawatEntry = {
       id: Number(data.id),
-      project_id: data.project_id,
-      participant_name: data.participant_name,
-      amount: Number(data.amount),
-      created_at: data.created_at,
+      project_id:
+        data.project_id,
+      participant_name:
+        data.participant_name,
+      amount:
+        Number(data.amount),
+      created_at:
+        data.created_at,
     };
 
     setEntries(
@@ -647,21 +654,9 @@ function ProjectContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
-
-        <div className="text-center">
-
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
-            <span className="text-3xl text-white">
-              ﷺ
-            </span>
-          </div>
-
-          <p className="font-medium text-[#174c3c]">
-            Loading Salawat project...
-          </p>
-
-        </div>
-
+        <p className="font-medium text-[#174c3c]">
+          Loading Salawat project...
+        </p>
       </main>
     );
   }
@@ -670,7 +665,7 @@ function ProjectContent() {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
 
-        <div className="w-full max-w-md rounded-3xl border border-[#e5ded0] bg-white p-7 text-center shadow-sm">
+        <div className="w-full max-w-md rounded-3xl bg-white p-7 text-center shadow-sm">
 
           <h1 className="text-xl font-semibold text-gray-900">
             Project Not Found
@@ -728,15 +723,17 @@ function ProjectContent() {
           <div className="flex items-center gap-2">
 
             {project.show_participants && (
+
               <button
                 type="button"
                 onClick={() =>
                   setShowScorecard(true)
                 }
-                className="rounded-full border border-[#174c3c] px-3 py-1.5 text-xs font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
+                className="rounded-full bg-[#174c3c] px-4 py-2 text-sm font-bold text-white shadow-md transition hover:bg-[#103d30] hover:shadow-lg"
               >
-                Scorecard
+                🏆 Scorecard
               </button>
+
             )}
 
             <button
@@ -750,7 +747,7 @@ function ProjectContent() {
                   )}`
                 )
               }
-              className="rounded-full border border-[#174c3c] px-3 py-1.5 text-xs font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
+              className="rounded-full border border-[#174c3c] px-3 py-1.5 text-xs font-semibold text-[#174c3c]"
             >
               Admin
             </button>
@@ -816,7 +813,9 @@ function ProjectContent() {
               <PieChart>
 
                 <Pie
-                  data={goalChartData}
+                  data={
+                    goalChartData
+                  }
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -828,8 +827,13 @@ function ProjectContent() {
                   stroke="none"
                 >
 
-                  <Cell fill="#174c3c" />
-                  <Cell fill="#e5e7eb" />
+                  <Cell
+                    fill="#174c3c"
+                  />
+
+                  <Cell
+                    fill="#e5e7eb"
+                  />
 
                 </Pie>
 
@@ -840,7 +844,10 @@ function ProjectContent() {
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
 
               <p className="text-4xl font-bold text-[#174c3c]">
-                {percentage.toFixed(0)}%
+                {percentage.toFixed(
+                  0
+                )}
+                %
               </p>
 
               <p className="mt-1 text-sm text-gray-500">
@@ -854,6 +861,7 @@ function ProjectContent() {
           <div className="mt-4 grid grid-cols-2 gap-3">
 
             <div className="rounded-2xl bg-[#f7f3e9] p-4 text-center">
+
               <p className="text-xs text-gray-500">
                 Completed
               </p>
@@ -861,9 +869,11 @@ function ProjectContent() {
               <p className="mt-1 text-xl font-bold text-[#174c3c]">
                 {total.toLocaleString()}
               </p>
+
             </div>
 
             <div className="rounded-2xl bg-[#f7f3e9] p-4 text-center">
+
               <p className="text-xs text-gray-500">
                 Remaining
               </p>
@@ -871,6 +881,7 @@ function ProjectContent() {
               <p className="mt-1 text-xl font-bold text-gray-900">
                 {remaining.toLocaleString()}
               </p>
+
             </div>
 
           </div>
@@ -919,14 +930,16 @@ function ProjectContent() {
           </div>
 
           <p className="mt-3 text-sm text-white/70">
+
             {dailyRemaining === 0
               ? "✓ Daily goal completed!"
               : `${dailyRemaining.toLocaleString()} remaining today`}
+
           </p>
 
         </div>
 
-        {/* PERSONAL SCORE SUMMARY */}
+        {/* PERSONAL SUMMARY */}
 
         <div className="mb-5 grid gap-3 sm:grid-cols-3">
 
@@ -968,6 +981,92 @@ function ProjectContent() {
 
         </div>
 
+        {/* SCORECARD CALL TO ACTION */}
+
+        {project.show_participants && (
+
+          <button
+            type="button"
+            onClick={() =>
+              setShowScorecard(true)
+            }
+            className="mb-5 w-full rounded-3xl bg-[#174c3c] p-5 text-left text-white shadow-md transition hover:bg-[#103d30] hover:shadow-lg"
+          >
+
+            <div className="flex items-center justify-between gap-4">
+
+              <div className="flex items-center gap-4">
+
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-2xl">
+                  🏆
+                </div>
+
+                <div>
+
+                  <p className="text-lg font-bold">
+                    Community Scorecard
+                  </p>
+
+                  <p className="mt-1 text-sm text-white/70">
+                    See everyone&apos;s progress and contribution
+                  </p>
+
+                </div>
+
+              </div>
+
+              <span className="text-2xl">
+                →
+              </span>
+
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-2">
+
+              <div className="rounded-xl bg-white/10 p-3">
+
+                <p className="text-xs text-white/60">
+                  Participants
+                </p>
+
+                <p className="mt-1 font-bold">
+                  {participantTotals.length}
+                </p>
+
+              </div>
+
+              <div className="rounded-xl bg-white/10 p-3">
+
+                <p className="text-xs text-white/60">
+                  Project Total
+                </p>
+
+                <p className="mt-1 font-bold">
+                  {total.toLocaleString()}
+                </p>
+
+              </div>
+
+              <div className="rounded-xl bg-white/10 p-3">
+
+                <p className="text-xs text-white/60">
+                  Your Rank
+                </p>
+
+                <p className="mt-1 font-bold">
+                  {myRank
+                    ? `#${myRank}`
+                    : "—"}
+                </p>
+
+              </div>
+
+            </div>
+
+          </button>
+
+        )}
+
         {/* ADD SALAWAT */}
 
         <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-sm">
@@ -990,9 +1089,11 @@ function ProjectContent() {
                   type="button"
                   disabled={adding}
                   onClick={() =>
-                    askQuickAddConfirmation(value)
+                    askQuickAddConfirmation(
+                      value
+                    )
                   }
-                  className="rounded-xl border border-[#174c3c] py-3 font-semibold text-[#174c3c] transition hover:bg-[#eef6f2] disabled:opacity-50"
+                  className="rounded-xl border border-[#174c3c] py-3 font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
                 >
                   +{value}
                 </button>
@@ -1002,44 +1103,32 @@ function ProjectContent() {
 
           </div>
 
-          <div className="mt-5">
+          <input
+            type="number"
+            min="1"
+            step="1"
+            value={amount}
+            onChange={(e) => {
+              setAmount(
+                e.target.value
+              );
 
-            <label
-              htmlFor="customAmount"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              Custom Amount
-            </label>
-
-            <input
-              id="customAmount"
-              type="number"
-              min="1"
-              step="1"
-              value={amount}
-              onChange={(e) => {
-                setAmount(
-                  e.target.value
-                );
-
-                setError("");
-              }}
-              placeholder="Example: 250"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
-            />
-
-          </div>
+              setError("");
+            }}
+            placeholder="Custom amount"
+            className="mt-5 w-full rounded-xl border border-gray-300 px-4 py-3"
+          />
 
           {error && (
-            <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p className="mt-3 text-sm text-red-600">
               {error}
-            </div>
+            </p>
           )}
 
           {success && (
-            <div className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+            <p className="mt-3 text-sm font-medium text-green-700">
               ✓ {success}
-            </div>
+            </p>
           )}
 
           <button
@@ -1048,7 +1137,7 @@ function ProjectContent() {
             onClick={() =>
               addSalawat()
             }
-            className="mt-4 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
+            className="mt-4 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white disabled:opacity-60"
           >
             {adding
               ? "Saving..."
@@ -1066,7 +1155,7 @@ function ProjectContent() {
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Total Salawat added to this project during the last 7 days.
+            Total project Salawat during the last 7 days.
           </p>
 
           <div className="mt-5 h-64">
@@ -1078,7 +1167,9 @@ function ProjectContent() {
                 height="100%"
               >
 
-                <BarChart data={chartData}>
+                <BarChart
+                  data={chartData}
+                >
 
                   <CartesianGrid
                     strokeDasharray="3 3"
@@ -1099,7 +1190,9 @@ function ProjectContent() {
 
                   <Tooltip
                     formatter={(value) => [
-                      Number(value).toLocaleString(),
+                      Number(
+                        value
+                      ).toLocaleString(),
                       "Salawat",
                     ]}
                   />
@@ -1150,6 +1243,7 @@ function ProjectContent() {
                 milestone,
                 index
               ) => {
+
                 const reached =
                   total >=
                   milestone.amount;
@@ -1175,7 +1269,8 @@ function ProjectContent() {
                   >
 
                     {index <
-                      milestones.length - 1 && (
+                      milestones.length -
+                        1 && (
 
                       <div
                         className={`absolute left-[17px] top-9 h-full w-0.5 ${
@@ -1213,14 +1308,7 @@ function ProjectContent() {
 
                         <div>
 
-                          <p
-                            className={`font-semibold ${
-                              reached ||
-                              current
-                                ? "text-[#174c3c]"
-                                : "text-gray-600"
-                            }`}
-                          >
+                          <p className="font-semibold text-gray-900">
                             {milestone.label}
                           </p>
 
@@ -1237,19 +1325,26 @@ function ProjectContent() {
                       </div>
 
                       {current && (
+
                         <p className="mt-3 text-sm font-medium text-[#174c3c]">
+
                           {Math.max(
-                            milestone.amount - total,
+                            milestone.amount -
+                              total,
                             0
                           ).toLocaleString()}{" "}
                           Salawat to reach this milestone
+
                         </p>
+
                       )}
 
                       {reached && (
+
                         <p className="mt-3 text-sm font-medium text-[#174c3c]">
                           ✓ Milestone reached
                         </p>
+
                       )}
 
                     </div>
@@ -1263,83 +1358,432 @@ function ProjectContent() {
 
         </div>
 
-        {/* PARTICIPANT CONTRIBUTIONS */}
+        {/* SCORECARD MODAL */}
 
-        {project.show_participants && (
-          <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-sm">
+        {showScorecard && (
 
-            <div className="flex items-start justify-between gap-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-5">
 
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Participant Contributions
-                </h2>
+            <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
 
-                <p className="mt-1 text-sm text-gray-500">
-                  Top contributors in this project.
-                </p>
+              {/* HEADER */}
+
+              <div className="flex items-start justify-between gap-4">
+
+                <div>
+
+                  <p className="text-sm font-semibold text-[#174c3c]">
+                    🏆 Community Progress
+                  </p>
+
+                  <h2 className="mt-1 text-3xl font-bold text-gray-900">
+                    Scorecard
+                  </h2>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    {project.project_name}
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowScorecard(
+                      false
+                    )
+                  }
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f7f3e9] text-2xl text-gray-600"
+                >
+                  ×
+                </button>
+
+              </div>
+
+              {/* SUMMARY */}
+
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+                <div className="rounded-2xl bg-[#174c3c] p-4 text-white">
+
+                  <p className="text-xs text-white/70">
+                    Total Salawat
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold">
+                    {total.toLocaleString()}
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-[#f7f3e9] p-4">
+
+                  <p className="text-xs text-gray-500">
+                    Participants
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold text-[#174c3c]">
+                    {participantTotals.length}
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-[#f7f3e9] p-4">
+
+                  <p className="text-xs text-gray-500">
+                    Your Total
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold text-[#174c3c]">
+                    {myTotal.toLocaleString()}
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-[#f7f3e9] p-4">
+
+                  <p className="text-xs text-gray-500">
+                    Your Rank
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold text-[#174c3c]">
+                    {myRank
+                      ? `#${myRank}`
+                      : "—"}
+                  </p>
+
+                </div>
+
+              </div>
+
+              {/* PODIUM */}
+
+              {participantTotals.length >
+                0 && (
+
+                <div className="mt-7">
+
+                  <p className="mb-4 text-center text-sm font-semibold uppercase tracking-wide text-gray-400">
+                    Top Contributors
+                  </p>
+
+                  <div className="grid grid-cols-3 items-end gap-2">
+
+                    {/* SECOND */}
+
+                    <div className="text-center">
+
+                      <div className="mb-2 text-3xl">
+                        🥈
+                      </div>
+
+                      <div className="rounded-2xl bg-[#f7f3e9] p-3 sm:p-4">
+
+                        <p className="truncate text-sm font-semibold text-gray-900">
+                          {participantTotals[1]?.name ||
+                            "—"}
+                        </p>
+
+                        <p className="mt-1 text-sm font-bold text-[#174c3c]">
+                          {participantTotals[1]
+                            ? participantTotals[1].total.toLocaleString()
+                            : "—"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* FIRST */}
+
+                    <div className="text-center">
+
+                      <div className="mb-2 text-4xl">
+                        🥇
+                      </div>
+
+                      <div className="rounded-2xl bg-[#174c3c] p-4 text-white shadow-md sm:p-5">
+
+                        <p className="truncate text-sm font-bold">
+                          {participantTotals[0]?.name ||
+                            "—"}
+                        </p>
+
+                        <p className="mt-1 text-lg font-bold">
+                          {participantTotals[0]
+                            ? participantTotals[0].total.toLocaleString()
+                            : "—"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* THIRD */}
+
+                    <div className="text-center">
+
+                      <div className="mb-2 text-3xl">
+                        🥉
+                      </div>
+
+                      <div className="rounded-2xl bg-[#f7f3e9] p-3 sm:p-4">
+
+                        <p className="truncate text-sm font-semibold text-gray-900">
+                          {participantTotals[2]?.name ||
+                            "—"}
+                        </p>
+
+                        <p className="mt-1 text-sm font-bold text-[#174c3c]">
+                          {participantTotals[2]
+                            ? participantTotals[2].total.toLocaleString()
+                            : "—"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {/* CONTRIBUTION CHART */}
+
+              {scorecardChartData.length >
+                0 && (
+
+                <div className="mt-7 rounded-3xl border border-[#e5ded0] p-5">
+
+                  <h3 className="font-semibold text-gray-900">
+                    Contribution Chart
+                  </h3>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    Top contributors by total Salawat
+                  </p>
+
+                  <div
+                    className="mt-5"
+                    style={{
+                      height: Math.max(
+                        240,
+                        scorecardChartData.length *
+                          48
+                      ),
+                    }}
+                  >
+
+                    <ResponsiveContainer
+                      width="100%"
+                      height="100%"
+                    >
+
+                      <BarChart
+                        data={
+                          scorecardChartData
+                        }
+                        layout="vertical"
+                        margin={{
+                          top: 5,
+                          right: 20,
+                          bottom: 5,
+                          left: 10,
+                        }}
+                      >
+
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          horizontal={
+                            false
+                          }
+                        />
+
+                        <XAxis
+                          type="number"
+                          tickLine={false}
+                          axisLine={false}
+                        />
+
+                        <YAxis
+                          type="category"
+                          dataKey="name"
+                          width={90}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+
+                        <Tooltip
+                          formatter={(
+                            value
+                          ) => [
+                            Number(
+                              value
+                            ).toLocaleString(),
+                            "Salawat",
+                          ]}
+                        />
+
+                        <Bar
+                          dataKey="total"
+                          fill="#174c3c"
+                          radius={[
+                            0,
+                            8,
+                            8,
+                            0,
+                          ]}
+                        />
+
+                      </BarChart>
+
+                    </ResponsiveContainer>
+
+                  </div>
+
+                </div>
+
+              )}
+
+              {/* EVERYONE */}
+
+              <div className="mt-7">
+
+                <div className="flex items-center justify-between">
+
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Everyone&apos;s Progress
+                  </h3>
+
+                  <span className="text-xs text-gray-400">
+                    {participantTotals.length}{" "}
+                    participant
+                    {participantTotals.length ===
+                    1
+                      ? ""
+                      : "s"}
+                  </span>
+
+                </div>
+
+                <div className="mt-4 space-y-3">
+
+                  {participantTotals.map(
+                    (
+                      participant,
+                      index
+                    ) => {
+
+                      const participantPercentage =
+                        total > 0
+                          ? (participant.total /
+                              total) *
+                            100
+                          : 0;
+
+                      const isMe =
+                        participant.name
+                          .trim()
+                          .toLowerCase() ===
+                        userName
+                          .trim()
+                          .toLowerCase();
+
+                      const medal =
+                        index === 0
+                          ? "🥇"
+                          : index === 1
+                          ? "🥈"
+                          : index === 2
+                          ? "🥉"
+                          : `#${index + 1}`;
+
+                      return (
+                        <div
+                          key={`${participant.name}-${index}`}
+                          className={`rounded-2xl border p-4 ${
+                            isMe
+                              ? "border-[#174c3c] bg-[#f4f8f6]"
+                              : "border-[#ece7dc] bg-[#f7f3e9]"
+                          }`}
+                        >
+
+                          <div className="flex items-center justify-between gap-3">
+
+                            <div className="flex min-w-0 items-center gap-3">
+
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold shadow-sm">
+                                {medal}
+                              </div>
+
+                              <div className="min-w-0">
+
+                                <p className="truncate font-semibold text-gray-900">
+                                  {participant.name}
+                                  {isMe
+                                    ? " (You)"
+                                    : ""}
+                                </p>
+
+                                <p className="mt-1 text-xs text-gray-500">
+                                  {participantPercentage.toFixed(
+                                    1
+                                  )}
+                                  % of project total
+                                </p>
+
+                              </div>
+
+                            </div>
+
+                            <p className="shrink-0 font-bold text-[#174c3c]">
+                              {participant.total.toLocaleString()}
+                            </p>
+
+                          </div>
+
+                          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white">
+
+                            <div
+                              className="h-full rounded-full bg-[#174c3c]"
+                              style={{
+                                width: `${Math.min(
+                                  participantPercentage,
+                                  100
+                                )}%`,
+                              }}
+                            />
+
+                          </div>
+
+                        </div>
+                      );
+                    }
+                  )}
+
+                </div>
+
               </div>
 
               <button
                 type="button"
                 onClick={() =>
-                  setShowScorecard(true)
+                  setShowScorecard(false)
                 }
-                className="shrink-0 rounded-full border border-[#174c3c] px-3 py-1.5 text-xs font-semibold text-[#174c3c]"
+                className="mt-7 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white"
               >
-                View All
+                Close Scorecard
               </button>
 
             </div>
 
-            {participantTotals.length === 0 ? (
-              <p className="mt-5 text-sm text-gray-500">
-                No contributions yet.
-              </p>
-            ) : (
-              <div className="mt-5 space-y-3">
-
-                {participantTotals
-                  .slice(0, 5)
-                  .map(
-                    (
-                      participant,
-                      index
-                    ) => (
-
-                      <div
-                        key={`${participant.name}-${index}`}
-                        className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f3e9] px-4 py-3"
-                      >
-
-                        <div className="flex min-w-0 items-center gap-3">
-
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#174c3c] text-sm font-semibold text-white">
-                            {index + 1}
-                          </div>
-
-                          <span className="truncate font-medium text-gray-900">
-                            {participant.name}
-                          </span>
-
-                        </div>
-
-                        <strong className="shrink-0 text-[#174c3c]">
-                          {participant.total.toLocaleString()}
-                        </strong>
-
-                      </div>
-
-                    )
-                  )}
-
-              </div>
-            )}
-
           </div>
+
         )}
 
-        {/* QUICK ADD CONFIRM */}
+        {/* CONFIRM QUICK ADD */}
 
         {pendingAmount !== null && (
 
@@ -1347,16 +1791,20 @@ function ProjectContent() {
 
             <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl">
 
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold">
                 Confirm Salawat
               </h2>
 
               <p className="mt-3 text-gray-600">
+
                 Add{" "}
+
                 <strong className="text-[#174c3c]">
                   {pendingAmount.toLocaleString()}
                 </strong>{" "}
-                Salawat to your contribution?
+
+                Salawat?
+
               </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
@@ -1365,7 +1813,9 @@ function ProjectContent() {
                   type="button"
                   disabled={adding}
                   onClick={() =>
-                    setPendingAmount(null)
+                    setPendingAmount(
+                      null
+                    )
                   }
                   className="rounded-xl border border-gray-300 py-3 font-semibold text-gray-700"
                 >
@@ -1395,180 +1845,6 @@ function ProjectContent() {
 
         )}
 
-        {/* SCORECARD MODAL */}
-
-        {showScorecard && (
-
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-
-            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
-
-              <div className="flex items-start justify-between gap-4">
-
-                <div>
-
-                  <p className="text-sm font-medium text-[#174c3c]">
-                    {project.project_name}
-                  </p>
-
-                  <h2 className="mt-1 text-2xl font-bold text-gray-900">
-                    Scorecard
-                  </h2>
-
-                  <p className="mt-1 text-sm text-gray-500">
-                    Everyone&apos;s total Salawat contribution
-                  </p>
-
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowScorecard(false)
-                  }
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f7f3e9] text-xl text-gray-600"
-                >
-                  ×
-                </button>
-
-              </div>
-
-              <div className="mt-5 rounded-2xl bg-[#174c3c] p-5 text-white">
-
-                <p className="text-sm text-white/70">
-                  Project Total
-                </p>
-
-                <p className="mt-1 text-3xl font-bold">
-                  {total.toLocaleString()}
-                </p>
-
-                <p className="mt-1 text-sm text-white/70">
-                  from{" "}
-                  {participantTotals.length.toLocaleString()}{" "}
-                  participant
-                  {participantTotals.length === 1
-                    ? ""
-                    : "s"}
-                </p>
-
-              </div>
-
-              <div className="mt-5 space-y-3">
-
-                {participantTotals.length === 0 ? (
-
-                  <div className="rounded-2xl bg-[#f7f3e9] p-5 text-center">
-                    <p className="text-sm text-gray-500">
-                      No contributions yet.
-                    </p>
-                  </div>
-
-                ) : (
-
-                  participantTotals.map(
-                    (
-                      participant,
-                      index
-                    ) => {
-
-                      const participantPercentage =
-                        total > 0
-                          ? (participant.total / total) * 100
-                          : 0;
-
-                      const isMe =
-                        participant.name
-                          .trim()
-                          .toLowerCase() ===
-                        userName
-                          .trim()
-                          .toLowerCase();
-
-                      return (
-                        <div
-                          key={`${participant.name}-${index}`}
-                          className={`rounded-2xl border p-4 ${
-                            isMe
-                              ? "border-[#174c3c] bg-[#f4f8f6]"
-                              : "border-[#ece7dc] bg-[#f7f3e9]"
-                          }`}
-                        >
-
-                          <div className="flex items-center justify-between gap-4">
-
-                            <div className="flex min-w-0 items-center gap-3">
-
-                              <div
-                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                                  index === 0
-                                    ? "bg-[#174c3c] text-white"
-                                    : "bg-white text-[#174c3c]"
-                                }`}
-                              >
-                                {index + 1}
-                              </div>
-
-                              <div className="min-w-0">
-
-                                <p className="truncate font-semibold text-gray-900">
-                                  {participant.name}
-                                  {isMe ? " (You)" : ""}
-                                </p>
-
-                                <p className="mt-1 text-xs text-gray-500">
-                                  {participantPercentage.toFixed(1)}% of project contributions
-                                </p>
-
-                              </div>
-
-                            </div>
-
-                            <p className="shrink-0 font-bold text-[#174c3c]">
-                              {participant.total.toLocaleString()}
-                            </p>
-
-                          </div>
-
-                          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
-
-                            <div
-                              className="h-full rounded-full bg-[#174c3c]"
-                              style={{
-                                width: `${Math.min(
-                                  participantPercentage,
-                                  100
-                                )}%`,
-                              }}
-                            />
-
-                          </div>
-
-                        </div>
-                      );
-                    }
-                  )
-
-                )}
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowScorecard(false)
-                }
-                className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white"
-              >
-                Close Scorecard
-              </button>
-
-            </div>
-
-          </div>
-
-        )}
-
       </div>
 
     </main>
@@ -1579,7 +1855,7 @@ export default function ProjectPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
+        <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center">
 
           <p className="font-medium text-[#174c3c]">
             Loading Salawat project...
