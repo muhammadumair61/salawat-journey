@@ -912,9 +912,7 @@ function ProjectContent() {
 
         {/* COMPACT PROJECT HEADER */}
 
-        <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white/60 px-4 py-3 shadow-sm sm:px-5">
-
-          {/* TOP ROW */}
+        <div className="mb-5 rounded-3xl border border-[#cfded6] bg-[#eaf3ee] px-4 py-3 shadow-sm sm:px-5">
 
           <div className="flex items-start justify-between gap-3">
 
@@ -957,14 +955,14 @@ function ProjectContent() {
                       )}`
                     )
                   }
-                  className="rounded-full border border-[#174c3c] px-3 py-2 text-xs font-semibold text-[#174c3c]"
+                  className="rounded-full border border-[#174c3c] bg-white/50 px-3 py-2 text-xs font-semibold text-[#174c3c]"
                 >
                   Admin
                 </button>
 
               </div>
 
-              <p className="mt-1 pr-1 text-[11px] text-gray-500 sm:text-xs">
+              <p className="mt-1 pr-1 text-[11px] text-[#567365] sm:text-xs">
 
                 Project ID:{" "}
 
@@ -977,8 +975,6 @@ function ProjectContent() {
             </div>
 
           </div>
-
-          {/* CENTER CONTENT */}
 
           <div className="-mt-6 flex flex-col items-center text-center sm:-mt-7">
 
@@ -1001,11 +997,11 @@ function ProjectContent() {
               {project.project_name}
             </h1>
 
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-[#50665b]">
 
               Assalamu Alaikum,{" "}
 
-              <span className="font-medium text-gray-800">
+              <span className="font-medium text-[#263b31]">
                 {userName}
               </span>
 
@@ -1946,8 +1942,6 @@ function ProjectContent() {
 
               </div>
 
-              {/* SUMMARY */}
-
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
 
                 <div className="rounded-2xl bg-[#174c3c] p-4 text-white">
@@ -2001,8 +1995,6 @@ function ProjectContent() {
                 </div>
 
               </div>
-
-              {/* TOP CONTRIBUTORS */}
 
               {participantTotals.length >
                 0 && (
@@ -2089,8 +2081,6 @@ function ProjectContent() {
                 </div>
 
               )}
-
-              {/* CONTRIBUTION CHART */}
 
               {scorecardChartData.length >
                 0 && (
@@ -2218,8 +2208,6 @@ function ProjectContent() {
 
               )}
 
-              {/* EVERYONE */}
-
               <div className="mt-7">
 
                 <div className="flex items-center justify-between">
@@ -2292,10 +2280,13 @@ function ProjectContent() {
                               <div className="min-w-0">
 
                                 <p className="truncate font-semibold text-gray-900">
+
                                   {participant.name}
+
                                   {isMe
                                     ? " (You)"
                                     : ""}
+
                                 </p>
 
                                 <p className="mt-1 text-xs text-gray-500">

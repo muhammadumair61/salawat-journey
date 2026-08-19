@@ -138,7 +138,7 @@ export default function CreateProjectPage() {
                 setProjectName(e.target.value);
                 setError("");
               }}
-              placeholder="Rahma Center Salawat"
+              placeholder="Enter Project Name Here"
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
           </div>
@@ -159,7 +159,7 @@ export default function CreateProjectPage() {
 
                 setError("");
               }}
-              placeholder="RAHMA2026"
+              placeholder="Enter Project ID Here"
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
 
@@ -197,7 +197,7 @@ export default function CreateProjectPage() {
                 setAdminName(e.target.value);
                 setError("");
               }}
-              placeholder="Umair"
+              placeholder="Enter Your Name Here"
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
           </div>
@@ -214,7 +214,7 @@ export default function CreateProjectPage() {
                 setAdminPin(e.target.value);
                 setError("");
               }}
-              placeholder="At least 4 characters"
+              placeholder="At least 4 digits"
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
 

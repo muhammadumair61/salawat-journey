@@ -89,7 +89,9 @@ function HomeContent() {
       setCheckingSharedProject(false);
 
       if (projectError) {
-        console.error(projectError);
+        console.error(
+          projectError
+        );
 
         setError(
           "Unable to load the shared project."
@@ -110,7 +112,9 @@ function HomeContent() {
         data.project_name
       );
 
-      setSharedProjectFound(true);
+      setSharedProjectFound(
+        true
+      );
     }
 
     loadSharedProject();
@@ -164,7 +168,9 @@ function HomeContent() {
     setLoading(false);
 
     if (projectError) {
-      console.error(projectError);
+      console.error(
+        projectError
+      );
 
       setError(
         "Unable to connect. Please try again."
@@ -226,7 +232,9 @@ function HomeContent() {
     setSharing(false);
 
     if (projectError) {
-      console.error(projectError);
+      console.error(
+        projectError
+      );
 
       setError(
         "Unable to find the project."
@@ -277,7 +285,10 @@ function HomeContent() {
   function joinDifferentProject() {
     router.push("/");
 
-    setSharedProjectFound(false);
+    setSharedProjectFound(
+      false
+    );
+
     setProjectName("");
     setProjectId("");
     setName("");
@@ -285,56 +296,62 @@ function HomeContent() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[#f7f3e9] px-4 py-10 sm:px-6">
+    <main className="min-h-screen bg-[#f7f3e9] px-4 py-4 sm:px-6">
 
-      {/* HOW TO USE */}
+      <div className="mx-auto w-full max-w-6xl">
 
-      <div className="absolute right-5 top-5 sm:right-8 sm:top-7">
+        {/* MAIN SAGE BANNER */}
 
-        <button
-          type="button"
-          onClick={() =>
-            setShowHelp(true)
-          }
-          className="rounded-full border border-[#174c3c] bg-white px-4 py-2 text-sm font-semibold text-[#174c3c] shadow-sm transition hover:bg-[#eef6f2]"
-        >
-          ? How to Use
-        </button>
+        <div className="relative mb-5 rounded-3xl border border-[#cfded6] bg-[#eaf3ee] px-4 py-4 shadow-sm sm:px-6">
 
-      </div>
+          {/* HOW TO USE */}
 
-      {/* HEADER */}
+          <div className="absolute right-3 top-3 sm:right-4 sm:top-4">
 
-      <div className="mx-auto max-w-5xl pt-14 sm:pt-10">
-
-        <div className="mb-8 text-center">
-
-          <p
-            dir="rtl"
-            className="mb-5 text-2xl font-medium text-[#174c3c]"
-          >
-            اللهم صل وسلم على نبينا محمد
-          </p>
-
-          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#174c3c] shadow-md">
-
-            <span className="text-4xl text-white">
-              ﷺ
-            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setShowHelp(true)
+              }
+              className="rounded-full border border-[#174c3c] bg-white/60 px-3 py-2 text-xs font-semibold text-[#174c3c] shadow-sm transition hover:bg-white sm:px-4 sm:text-sm"
+            >
+              ? How to Use
+            </button>
 
           </div>
 
-          <h1 className="text-3xl font-bold text-[#174c3c] sm:text-4xl">
-            Salawat Journey
-          </h1>
+          {/* BRANDING */}
 
-          <p className="mt-3 text-gray-600">
-            Every Salawat counts. Join the Salawat project.
-          </p>
+          <div className="flex flex-col items-center px-20 text-center">
+
+            <p
+              dir="rtl"
+              className="text-base font-medium leading-none text-[#174c3c] sm:text-lg"
+            >
+              اللهم صل وسلم على نبينا محمد
+            </p>
+
+            <div className="mt-2 flex h-11 w-11 items-center justify-center rounded-full bg-[#174c3c] shadow-sm">
+
+              <span className="text-xl text-white">
+                ﷺ
+              </span>
+
+            </div>
+
+            <h1 className="mt-2 text-2xl font-bold leading-tight text-[#174c3c] sm:text-3xl">
+              Salawat Journey
+            </h1>
+
+            <p className="mt-1 text-sm text-[#50665b]">
+              Every Salawat counts. Join the Salawat project.
+            </p>
+
+          </div>
 
         </div>
 
-        {/* 3 COLUMN AREA */}
+        {/* MAIN CONTENT */}
 
         <div className="grid items-start gap-5 lg:grid-cols-[1fr_420px_1fr]">
 
@@ -842,7 +859,7 @@ export default function HomePage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center">
+        <main className="flex min-h-screen items-center justify-center bg-[#f7f3e9]">
 
           <p className="font-medium text-[#174c3c]">
             Loading...
