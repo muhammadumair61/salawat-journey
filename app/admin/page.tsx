@@ -88,9 +88,7 @@ function AdminContent() {
   const [success, setSuccess] =
     useState("");
 
-  /*
-   * ADMIN ADD-ON-BEHALF
-   */
+  /* ADD ENTRY FOR PARTICIPANT */
 
   const [participantSearch, setParticipantSearch] =
     useState("");
@@ -109,6 +107,20 @@ function AdminContent() {
   ] = useState(false);
 
   const [addingEntry, setAddingEntry] =
+    useState(false);
+
+  /* EDIT ENTRY */
+
+  const [editingEntry, setEditingEntry] =
+    useState<Entry | null>(null);
+
+  const [editAmount, setEditAmount] =
+    useState("");
+
+  const [editDate, setEditDate] =
+    useState("");
+
+  const [updatingEntry, setUpdatingEntry] =
     useState(false);
 
   const loadProject = useCallback(async () => {
@@ -191,6 +203,7 @@ function AdminContent() {
 
   const loadEntries = useCallback(
     async (projectId: string) => {
+
       const {
         data,
         error: entryError,
@@ -241,15 +254,9 @@ function AdminContent() {
     []
   );
 
-  /*
-   * LOAD ALL EXISTING PARTICIPANT NAMES
-   *
-   * This is separate from Recent Entries because
-   * Recent Entries only loads the latest 50.
-   */
-
   const loadParticipantNames = useCallback(
     async (projectId: string) => {
+
       const {
         data,
         error: participantError,
@@ -312,12 +319,9 @@ function AdminContent() {
     loadProject,
   ]);
 
-  /*
-   * AUTOCOMPLETE RESULTS
-   */
-
   const filteredParticipantNames =
     useMemo(() => {
+
       const search =
         participantSearch
           .trim()
@@ -340,6 +344,7 @@ function AdminContent() {
           0,
           12
         );
+
     }, [
       participantNames,
       participantSearch,
@@ -350,6 +355,7 @@ function AdminContent() {
     setSuccess("");
 
     if (!adminPin.trim()) {
+
       setError(
         "Please enter the Admin PIN."
       );
@@ -375,7 +381,10 @@ function AdminContent() {
     setVerifying(false);
 
     if (verifyError) {
-      console.error(verifyError);
+
+      console.error(
+        verifyError
+      );
 
       setError(
         "Unable to verify Admin PIN."
@@ -385,6 +394,7 @@ function AdminContent() {
     }
 
     if (!data) {
+
       setError(
         "Incorrect Admin PIN."
       );
@@ -395,10 +405,12 @@ function AdminContent() {
     setVerified(true);
 
     if (project) {
+
       await Promise.all([
         loadEntries(
           project.id
         ),
+
         loadParticipantNames(
           project.id
         ),
@@ -422,6 +434,7 @@ function AdminContent() {
     if (
       cleanProjectName.length < 2
     ) {
+
       setError(
         "Please enter a valid project name."
       );
@@ -433,6 +446,7 @@ function AdminContent() {
       !Number.isFinite(numericGoal) ||
       numericGoal <= 0
     ) {
+
       setError(
         "Please enter a valid overall project goal."
       );
@@ -444,6 +458,7 @@ function AdminContent() {
       !Number.isFinite(numericDailyGoal) ||
       numericDailyGoal <= 0
     ) {
+
       setError(
         "Please enter a valid daily goal."
       );
@@ -460,14 +475,19 @@ function AdminContent() {
       {
         p_project_code:
           projectCode,
+
         p_admin_pin:
           adminPin,
+
         p_project_name:
           cleanProjectName,
+
         p_goal:
           numericGoal,
+
         p_daily_goal:
           numericDailyGoal,
+
         p_show_participants:
           showParticipants,
       }
@@ -476,7 +496,10 @@ function AdminContent() {
     setSaving(false);
 
     if (updateError) {
-      console.error(updateError);
+
+      console.error(
+        updateError
+      );
 
       setError(
         updateError.message ||
@@ -500,13 +523,10 @@ function AdminContent() {
     );
   }
 
-  /*
-   * SELECT A PARTICIPANT FROM AUTOCOMPLETE
-   */
-
   function chooseParticipant(
     name: string
   ) {
+
     setParticipantSearch(
       name
     );
@@ -521,10 +541,6 @@ function AdminContent() {
 
     setError("");
   }
-
-  /*
-   * ADD SALAWAT ON PARTICIPANT'S BEHALF
-   */
 
   async function addParticipantEntry() {
     if (!project) {
@@ -541,17 +557,13 @@ function AdminContent() {
       Number(adminEntryAmount);
 
     if (!cleanName) {
+
       setError(
         "Please choose a participant from the list."
       );
 
       return;
     }
-
-    /*
-     * Verify that the selected name really exists.
-     * This prevents accidental duplicate spellings.
-     */
 
     const matchingParticipant =
       participantNames.find(
@@ -565,6 +577,7 @@ function AdminContent() {
       );
 
     if (!matchingParticipant) {
+
       setError(
         "Please select an existing participant from the suggestions."
       );
@@ -576,6 +589,7 @@ function AdminContent() {
       !Number.isFinite(amount) ||
       amount <= 0
     ) {
+
       setError(
         "Please enter a valid Salawat amount."
       );
@@ -595,8 +609,10 @@ function AdminContent() {
       .insert({
         project_id:
           project.id,
+
         participant_name:
           matchingParticipant,
+
         amount,
       })
       .select(
@@ -607,6 +623,7 @@ function AdminContent() {
     setAddingEntry(false);
 
     if (insertError) {
+
       console.error(
         insertError
       );
@@ -620,11 +637,16 @@ function AdminContent() {
     }
 
     const newEntry: Entry = {
-      id: Number(data.id),
+
+      id:
+        Number(data.id),
+
       participant_name:
         data.participant_name,
+
       amount:
         Number(data.amount),
+
       created_at:
         data.created_at,
     };
@@ -667,9 +689,225 @@ function AdminContent() {
     );
   }
 
+  /*
+   * Convert database date into
+   * datetime-local input format.
+   */
+
+  function formatDateForInput(
+    dateString: string
+  ) {
+
+    const date =
+      new Date(dateString);
+
+    const timezoneOffset =
+      date.getTimezoneOffset();
+
+    const localDate =
+      new Date(
+        date.getTime() -
+          timezoneOffset *
+            60 *
+            1000
+      );
+
+    return localDate
+      .toISOString()
+      .slice(
+        0,
+        16
+      );
+  }
+
+  function startEditingEntry(
+    entry: Entry
+  ) {
+
+    setEditingEntry(
+      entry
+    );
+
+    setEditAmount(
+      String(entry.amount)
+    );
+
+    setEditDate(
+      formatDateForInput(
+        entry.created_at
+      )
+    );
+
+    setError("");
+    setSuccess("");
+  }
+
+  function cancelEditingEntry() {
+
+    setEditingEntry(
+      null
+    );
+
+    setEditAmount(
+      ""
+    );
+
+    setEditDate(
+      ""
+    );
+  }
+
+  async function updateEntry() {
+    if (!editingEntry) {
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+
+    const numericAmount =
+      Number(editAmount);
+
+    if (
+      !Number.isFinite(
+        numericAmount
+      ) ||
+      numericAmount <= 0
+    ) {
+
+      setError(
+        "Please enter a valid Salawat amount."
+      );
+
+      return;
+    }
+
+    if (!editDate) {
+
+      setError(
+        "Please select a valid date and time."
+      );
+
+      return;
+    }
+
+    const newDate =
+      new Date(editDate);
+
+    if (
+      Number.isNaN(
+        newDate.getTime()
+      )
+    ) {
+
+      setError(
+        "Please select a valid date and time."
+      );
+
+      return;
+    }
+
+    setUpdatingEntry(
+      true
+    );
+
+    const {
+      error: updateError,
+    } = await supabase.rpc(
+      "update_salawat_entry",
+      {
+        p_project_code:
+          projectCode,
+
+        p_admin_pin:
+          adminPin,
+
+        p_entry_id:
+          editingEntry.id,
+
+        p_amount:
+          numericAmount,
+
+        p_created_at:
+          newDate.toISOString(),
+      }
+    );
+
+    setUpdatingEntry(
+      false
+    );
+
+    if (updateError) {
+
+      console.error(
+        updateError
+      );
+
+      setError(
+        updateError.message ||
+          "Unable to update entry."
+      );
+
+      return;
+    }
+
+    setEntries(
+      (previous) =>
+        previous
+          .map(
+            (entry) =>
+              entry.id ===
+              editingEntry.id
+                ? {
+                    ...entry,
+
+                    amount:
+                      numericAmount,
+
+                    created_at:
+                      newDate.toISOString(),
+                  }
+                : entry
+          )
+          .sort(
+            (a, b) =>
+              new Date(
+                b.created_at
+              ).getTime() -
+              new Date(
+                a.created_at
+              ).getTime()
+          )
+    );
+
+    setSuccess(
+      `Entry for ${editingEntry.participant_name} updated.`
+    );
+
+    setEditingEntry(
+      null
+    );
+
+    setEditAmount(
+      ""
+    );
+
+    setEditDate(
+      ""
+    );
+
+    window.setTimeout(
+      () => {
+        setSuccess("");
+      },
+      3000
+    );
+  }
+
   async function deleteEntry(
     entryId: number
   ) {
+
     const confirmed =
       window.confirm(
         "Delete this Salawat entry? This cannot be undone."
@@ -693,17 +931,24 @@ function AdminContent() {
       {
         p_project_code:
           projectCode,
+
         p_admin_pin:
           adminPin,
+
         p_entry_id:
           entryId,
       }
     );
 
-    setDeletingId(null);
+    setDeletingId(
+      null
+    );
 
     if (deleteError) {
-      console.error(deleteError);
+
+      console.error(
+        deleteError
+      );
 
       setError(
         deleteError.message ||
@@ -717,7 +962,8 @@ function AdminContent() {
       (previous) =>
         previous.filter(
           (entry) =>
-            entry.id !== entryId
+            entry.id !==
+            entryId
         )
     );
 
@@ -734,8 +980,13 @@ function AdminContent() {
   }
 
   function backToProject() {
+
     if (!projectCode) {
-      router.push("/");
+
+      router.push(
+        "/"
+      );
+
       return;
     }
 
@@ -817,8 +1068,6 @@ function AdminContent() {
 
         <div className="mx-auto w-full max-w-md">
 
-          {/* COMPACT SAGE ADMIN BANNER */}
-
           <div className="mb-5 rounded-3xl border border-[#cfded6] bg-[#eaf3ee] px-4 py-3 shadow-sm sm:px-5">
 
             <button
@@ -857,17 +1106,18 @@ function AdminContent() {
               </p>
 
               <p className="mt-1 text-xs font-medium text-[#567365]">
+
                 Project ID:{" "}
+
                 <span className="font-semibold text-[#174c3c]">
                   {project.project_code}
                 </span>
+
               </p>
 
             </div>
 
           </div>
-
-          {/* PIN CARD */}
 
           <div className="rounded-3xl border border-[#e5ded0] bg-white p-7 shadow-sm">
 
@@ -881,8 +1131,11 @@ function AdminContent() {
             <input
               id="adminPin"
               type="password"
-              value={adminPin}
+              value={
+                adminPin
+              }
               onChange={(e) => {
+
                 setAdminPin(
                   e.target.value
                 );
@@ -890,11 +1143,14 @@ function AdminContent() {
                 setError("");
               }}
               onKeyDown={(e) => {
+
                 if (
-                  e.key === "Enter"
+                  e.key ===
+                  "Enter"
                 ) {
                   verifyPin();
                 }
+
               }}
               placeholder="Enter Admin PIN"
               autoFocus
@@ -937,7 +1193,7 @@ function AdminContent() {
 
       <div className="mx-auto w-full max-w-2xl">
 
-        {/* ADMIN HEADER */}
+        {/* ADMIN BANNER */}
 
         <div className="mb-5 rounded-3xl border border-[#cfded6] bg-[#eaf3ee] px-4 py-3 shadow-sm sm:px-5">
 
@@ -989,7 +1245,7 @@ function AdminContent() {
 
         </div>
 
-        {/* GLOBAL MESSAGES */}
+        {/* MESSAGES */}
 
         {error && (
 
@@ -1031,8 +1287,6 @@ function AdminContent() {
 
           </div>
 
-          {/* PARTICIPANT SEARCH */}
-
           <div className="relative mt-6">
 
             <label
@@ -1052,11 +1306,14 @@ function AdminContent() {
                   participantSearch
                 }
                 onFocus={() => {
+
                   setShowParticipantSuggestions(
                     true
                   );
+
                 }}
                 onChange={(e) => {
+
                   setParticipantSearch(
                     e.target.value
                   );
@@ -1081,8 +1338,6 @@ function AdminContent() {
 
             </div>
 
-            {/* AUTOCOMPLETE DROPDOWN */}
-
             {showParticipantSuggestions && (
 
               <div className="absolute left-0 right-0 top-full z-30 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-[#d7e3dc] bg-white p-2 shadow-xl">
@@ -1096,10 +1351,6 @@ function AdminContent() {
                       No matching participant found.
                     </p>
 
-                    <p className="mt-1 text-xs text-gray-400">
-                      Try another name.
-                    </p>
-
                   </div>
 
                 ) : (
@@ -1111,11 +1362,13 @@ function AdminContent() {
                         key={name}
                         type="button"
                         onMouseDown={(e) => {
+
                           e.preventDefault();
 
                           chooseParticipant(
                             name
                           );
+
                         }}
                         className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition hover:bg-[#eef6f2]"
                       >
@@ -1168,8 +1421,6 @@ function AdminContent() {
 
           </div>
 
-          {/* AMOUNT */}
-
           <div className="mt-5">
 
             <label
@@ -1188,6 +1439,7 @@ function AdminContent() {
                 adminEntryAmount
               }
               onChange={(e) => {
+
                 setAdminEntryAmount(
                   e.target.value
                 );
@@ -1195,20 +1447,20 @@ function AdminContent() {
                 setError("");
               }}
               onKeyDown={(e) => {
+
                 if (
                   e.key ===
                   "Enter"
                 ) {
                   addParticipantEntry();
                 }
+
               }}
               placeholder="Enter amount"
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
 
           </div>
-
-          {/* QUICK AMOUNTS */}
 
           <div className="mt-3 flex flex-wrap gap-2">
 
@@ -1239,8 +1491,6 @@ function AdminContent() {
 
           </div>
 
-          {/* ADD BUTTON */}
-
           <button
             type="button"
             disabled={
@@ -1249,7 +1499,7 @@ function AdminContent() {
             onClick={
               addParticipantEntry
             }
-            className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
           >
             {addingEntry
               ? "Adding Entry..."
@@ -1288,6 +1538,7 @@ function AdminContent() {
                 projectName
               }
               onChange={(e) => {
+
                 setProjectName(
                   e.target.value
                 );
@@ -1313,8 +1564,11 @@ function AdminContent() {
               type="number"
               min="1"
               step="1"
-              value={goal}
+              value={
+                goal
+              }
               onChange={(e) => {
+
                 setGoal(
                   e.target.value
                 );
@@ -1353,6 +1607,7 @@ function AdminContent() {
                 dailyGoal
               }
               onChange={(e) => {
+
                 setDailyGoal(
                   e.target.value
                 );
@@ -1446,7 +1701,7 @@ function AdminContent() {
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Review and remove incorrect Salawat entries.
+            Review, edit or remove incorrect Salawat entries.
           </p>
 
           <div className="mt-5 space-y-3">
@@ -1466,32 +1721,54 @@ function AdminContent() {
               entries.map((entry) => (
 
                 <div
-                  key={entry.id}
-                  className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f3e9] px-4 py-3"
+                  key={
+                    entry.id
+                  }
+                  className="rounded-2xl bg-[#f7f3e9] px-4 py-3"
                 >
 
-                  <div className="min-w-0">
+                  <div className="flex items-center justify-between gap-4">
 
-                    <p className="truncate font-medium text-gray-900">
-                      {entry.participant_name}
-                    </p>
+                    <div className="min-w-0">
 
-                    <p className="mt-1 text-xs text-gray-500">
-                      {new Date(
-                        entry.created_at
-                      ).toLocaleString()}
-                    </p>
+                      <p className="truncate font-medium text-gray-900">
+                        {entry.participant_name}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500">
+                        {new Date(
+                          entry.created_at
+                        ).toLocaleString()}
+                      </p>
+
+                    </div>
+
+                    <div className="shrink-0 text-right">
+
+                      <p className="font-semibold text-[#174c3c]">
+                        +
+                        {Number(
+                          entry.amount
+                        ).toLocaleString()}
+                      </p>
+
+                    </div>
 
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-4">
+                  <div className="mt-3 flex items-center justify-end gap-2 border-t border-[#e7e1d6] pt-3">
 
-                    <span className="font-semibold text-[#174c3c]">
-                      +
-                      {Number(
-                        entry.amount
-                      ).toLocaleString()}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        startEditingEntry(
+                          entry
+                        )
+                      }
+                      className="rounded-lg border border-[#174c3c]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
+                    >
+                      ✏️ Edit
+                    </button>
 
                     <button
                       type="button"
@@ -1504,7 +1781,7 @@ function AdminContent() {
                           entry.id
                         )
                       }
-                      className="text-sm font-semibold text-red-600 disabled:opacity-50"
+                      className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                     >
                       {deletingId ===
                       entry.id
@@ -1523,6 +1800,143 @@ function AdminContent() {
           </div>
 
         </div>
+
+        {/* EDIT ENTRY MODAL */}
+
+        {editingEntry && (
+
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-5">
+
+            <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+
+              <div className="flex items-start justify-between gap-4">
+
+                <div>
+
+                  <p className="text-sm font-semibold text-[#174c3c]">
+                    Edit Salawat Entry
+                  </p>
+
+                  <h2 className="mt-1 text-2xl font-bold text-gray-900">
+                    {editingEntry.participant_name}
+                  </h2>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={
+                    cancelEditingEntry
+                  }
+                  disabled={
+                    updatingEntry
+                  }
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f7f3e9] text-xl text-gray-600"
+                >
+                  ×
+                </button>
+
+              </div>
+
+              <div className="mt-6">
+
+                <label
+                  htmlFor="editAmount"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Salawat Amount
+                </label>
+
+                <input
+                  id="editAmount"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={
+                    editAmount
+                  }
+                  onChange={(e) => {
+
+                    setEditAmount(
+                      e.target.value
+                    );
+
+                    setError("");
+                  }}
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+                />
+
+              </div>
+
+              <div className="mt-5">
+
+                <label
+                  htmlFor="editDate"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
+                  Date &amp; Time
+                </label>
+
+                <input
+                  id="editDate"
+                  type="datetime-local"
+                  value={
+                    editDate
+                  }
+                  onChange={(e) => {
+
+                    setEditDate(
+                      e.target.value
+                    );
+
+                    setError("");
+                  }}
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+                />
+
+                <p className="mt-2 text-xs text-gray-500">
+                  Change this if the Salawat was entered for the wrong date.
+                </p>
+
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-3">
+
+                <button
+                  type="button"
+                  onClick={
+                    cancelEditingEntry
+                  }
+                  disabled={
+                    updatingEntry
+                  }
+                  className="rounded-xl border border-gray-300 py-3 font-semibold text-gray-700 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    updateEntry
+                  }
+                  disabled={
+                    updatingEntry
+                  }
+                  className="rounded-xl bg-[#174c3c] py-3 font-semibold text-white disabled:opacity-60"
+                >
+                  {updatingEntry
+                    ? "Saving..."
+                    : "Save Changes"}
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
 
       </div>
 
