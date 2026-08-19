@@ -852,25 +852,25 @@ function AdminContent() {
 
     const {
       error: updateError,
-    } = await supabase
-      .from(
-        "salawat_entries"
-      )
-      .update({
-        amount:
+    } = await supabase.rpc(
+      "update_salawat_entry",
+      {
+        p_project_code:
+          projectCode,
+
+        p_admin_pin:
+          adminPin,
+
+        p_entry_id:
+          editingEntry.id,
+
+        p_amount:
           numericAmount,
 
-        created_at:
+        p_created_at:
           newDate.toISOString(),
-      })
-      .eq(
-        "id",
-        editingEntry.id
-      )
-      .eq(
-        "project_id",
-        project.id
-      );
+      }
+    );
 
     setUpdatingEntry(
       false
