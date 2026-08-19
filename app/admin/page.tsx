@@ -168,16 +168,21 @@ function AdminContent() {
 
     const projectData: Project = {
       id: data.id,
-      project_code: data.project_code,
-      project_name: data.project_name,
-      goal: Number(data.goal),
+      project_code:
+        data.project_code,
+      project_name:
+        data.project_name,
+      goal:
+        Number(data.goal),
       daily_goal:
         Number(data.daily_goal) || 100,
       show_participants:
         data.show_participants ?? true,
     };
 
-    setProject(projectData);
+    setProject(
+      projectData
+    );
 
     setProjectName(
       projectData.project_name
@@ -203,7 +208,6 @@ function AdminContent() {
 
   const loadEntries = useCallback(
     async (projectId: string) => {
-
       const {
         data,
         error: entryError,
@@ -225,7 +229,9 @@ function AdminContent() {
         .limit(50);
 
       if (entryError) {
-        console.error(entryError);
+        console.error(
+          entryError
+        );
 
         setError(
           "Unable to load recent entries."
@@ -237,11 +243,15 @@ function AdminContent() {
       const cleanEntries: Entry[] =
         (data || []).map(
           (entry) => ({
-            id: Number(entry.id),
+            id:
+              Number(entry.id),
+
             participant_name:
               entry.participant_name,
+
             amount:
               Number(entry.amount),
+
             created_at:
               entry.created_at,
           })
@@ -254,64 +264,75 @@ function AdminContent() {
     []
   );
 
-  const loadParticipantNames = useCallback(
-    async (projectId: string) => {
+  const loadParticipantNames =
+    useCallback(
+      async (
+        projectId: string
+      ) => {
+        const {
+          data,
+          error: participantError,
+        } = await supabase
+          .from(
+            "salawat_entries"
+          )
+          .select(
+            "participant_name"
+          )
+          .eq(
+            "project_id",
+            projectId
+          );
 
-      const {
-        data,
-        error: participantError,
-      } = await supabase
-        .from("salawat_entries")
-        .select(
-          "participant_name"
-        )
-        .eq(
-          "project_id",
-          projectId
-        );
-
-      if (participantError) {
-        console.error(
+        if (
           participantError
+        ) {
+          console.error(
+            participantError
+          );
+
+          setError(
+            "Unable to load participant names."
+          );
+
+          return;
+        }
+
+        const uniqueNames =
+          Array.from(
+            new Map(
+              (data || [])
+                .map(
+                  (entry) =>
+                    String(
+                      entry.participant_name ||
+                        ""
+                    ).trim()
+                )
+                .filter(
+                  (name) =>
+                    name &&
+                    name.toLowerCase() !==
+                      "2024 historical total"
+                )
+                .map(
+                  (name) => [
+                    name.toLowerCase(),
+                    name,
+                  ]
+                )
+            ).values()
+          ).sort(
+            (a, b) =>
+              a.localeCompare(b)
+          );
+
+        setParticipantNames(
+          uniqueNames
         );
-
-        setError(
-          "Unable to load participant names."
-        );
-
-        return;
-      }
-
-      const uniqueNames =
-        Array.from(
-          new Map(
-            (data || [])
-              .map((entry) =>
-                String(
-                  entry.participant_name || ""
-                ).trim()
-              )
-              .filter(
-                (name) =>
-                  name &&
-                  name.toLowerCase() !==
-                    "2024 historical total"
-              )
-              .map((name) => [
-                name.toLowerCase(),
-                name,
-              ])
-          ).values()
-        ).sort((a, b) =>
-          a.localeCompare(b)
-        );
-
-      setParticipantNames(
-        uniqueNames
-      );
-    },
-    []
-  );
+      },
+      []
+    );
 
   useEffect(() => {
     loadProject();
@@ -321,7 +342,6 @@ function AdminContent() {
 
   const filteredParticipantNames =
     useMemo(() => {
-
       const search =
         participantSearch
           .trim()
@@ -335,16 +355,16 @@ function AdminContent() {
       }
 
       return participantNames
-        .filter((name) =>
-          name
-            .toLowerCase()
-            .includes(search)
+        .filter(
+          (name) =>
+            name
+              .toLowerCase()
+              .includes(search)
         )
         .slice(
           0,
           12
         );
-
     }, [
       participantNames,
       participantSearch,
@@ -355,7 +375,6 @@ function AdminContent() {
     setSuccess("");
 
     if (!adminPin.trim()) {
-
       setError(
         "Please enter the Admin PIN."
       );
@@ -373,6 +392,7 @@ function AdminContent() {
       {
         p_project_code:
           projectCode,
+
         p_admin_pin:
           adminPin,
       }
@@ -381,7 +401,6 @@ function AdminContent() {
     setVerifying(false);
 
     if (verifyError) {
-
       console.error(
         verifyError
       );
@@ -394,7 +413,6 @@ function AdminContent() {
     }
 
     if (!data) {
-
       setError(
         "Incorrect Admin PIN."
       );
@@ -405,7 +423,6 @@ function AdminContent() {
     setVerified(true);
 
     if (project) {
-
       await Promise.all([
         loadEntries(
           project.id
@@ -432,9 +449,9 @@ function AdminContent() {
       Number(dailyGoal);
 
     if (
-      cleanProjectName.length < 2
+      cleanProjectName.length <
+      2
     ) {
-
       setError(
         "Please enter a valid project name."
       );
@@ -443,10 +460,11 @@ function AdminContent() {
     }
 
     if (
-      !Number.isFinite(numericGoal) ||
+      !Number.isFinite(
+        numericGoal
+      ) ||
       numericGoal <= 0
     ) {
-
       setError(
         "Please enter a valid overall project goal."
       );
@@ -455,10 +473,11 @@ function AdminContent() {
     }
 
     if (
-      !Number.isFinite(numericDailyGoal) ||
+      !Number.isFinite(
+        numericDailyGoal
+      ) ||
       numericDailyGoal <= 0
     ) {
-
       setError(
         "Please enter a valid daily goal."
       );
@@ -496,7 +515,6 @@ function AdminContent() {
     setSaving(false);
 
     if (updateError) {
-
       console.error(
         updateError
       );
@@ -526,7 +544,6 @@ function AdminContent() {
   function chooseParticipant(
     name: string
   ) {
-
     setParticipantSearch(
       name
     );
@@ -554,10 +571,11 @@ function AdminContent() {
       selectedParticipant.trim();
 
     const amount =
-      Number(adminEntryAmount);
+      Number(
+        adminEntryAmount
+      );
 
     if (!cleanName) {
-
       setError(
         "Please choose a participant from the list."
       );
@@ -576,8 +594,9 @@ function AdminContent() {
             .toLowerCase()
       );
 
-    if (!matchingParticipant) {
-
+    if (
+      !matchingParticipant
+    ) {
       setError(
         "Please select an existing participant from the suggestions."
       );
@@ -586,10 +605,11 @@ function AdminContent() {
     }
 
     if (
-      !Number.isFinite(amount) ||
+      !Number.isFinite(
+        amount
+      ) ||
       amount <= 0
     ) {
-
       setError(
         "Please enter a valid Salawat amount."
       );
@@ -597,7 +617,9 @@ function AdminContent() {
       return;
     }
 
-    setAddingEntry(true);
+    setAddingEntry(
+      true
+    );
 
     const {
       data,
@@ -620,10 +642,11 @@ function AdminContent() {
       )
       .single();
 
-    setAddingEntry(false);
+    setAddingEntry(
+      false
+    );
 
     if (insertError) {
-
       console.error(
         insertError
       );
@@ -637,7 +660,6 @@ function AdminContent() {
     }
 
     const newEntry: Entry = {
-
       id:
         Number(data.id),
 
@@ -690,46 +712,67 @@ function AdminContent() {
   }
 
   /*
-   * Convert database date into
-   * datetime-local input format.
+   * Converts the database timestamp
+   * to browser-local datetime format.
    */
 
   function formatDateForInput(
     dateString: string
   ) {
-
     const date =
-      new Date(dateString);
-
-    const timezoneOffset =
-      date.getTimezoneOffset();
-
-    const localDate =
       new Date(
-        date.getTime() -
-          timezoneOffset *
-            60 *
-            1000
+        dateString
       );
 
-    return localDate
-      .toISOString()
-      .slice(
-        0,
-        16
+    const year =
+      date.getFullYear();
+
+    const month =
+      String(
+        date.getMonth() + 1
+      ).padStart(
+        2,
+        "0"
       );
+
+    const day =
+      String(
+        date.getDate()
+      ).padStart(
+        2,
+        "0"
+      );
+
+    const hours =
+      String(
+        date.getHours()
+      ).padStart(
+        2,
+        "0"
+      );
+
+    const minutes =
+      String(
+        date.getMinutes()
+      ).padStart(
+        2,
+        "0"
+      );
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
   function startEditingEntry(
     entry: Entry
   ) {
-
     setEditingEntry(
       entry
     );
 
     setEditAmount(
-      String(entry.amount)
+      String(
+        entry.amount
+      )
     );
 
     setEditDate(
@@ -743,7 +786,6 @@ function AdminContent() {
   }
 
   function cancelEditingEntry() {
-
     setEditingEntry(
       null
     );
@@ -755,10 +797,19 @@ function AdminContent() {
     setEditDate(
       ""
     );
+
+    setError("");
   }
 
+  /*
+   * UPDATE ENTRY DIRECTLY
+   */
+
   async function updateEntry() {
-    if (!editingEntry) {
+    if (
+      !editingEntry ||
+      !project
+    ) {
       return;
     }
 
@@ -766,7 +817,9 @@ function AdminContent() {
     setSuccess("");
 
     const numericAmount =
-      Number(editAmount);
+      Number(
+        editAmount
+      );
 
     if (
       !Number.isFinite(
@@ -774,7 +827,6 @@ function AdminContent() {
       ) ||
       numericAmount <= 0
     ) {
-
       setError(
         "Please enter a valid Salawat amount."
       );
@@ -783,25 +835,33 @@ function AdminContent() {
     }
 
     if (!editDate) {
-
       setError(
-        "Please select a valid date and time."
+        "Please choose a valid date and time."
       );
 
       return;
     }
 
+    /*
+     * datetime-local gives a value like:
+     * 2026-08-19T15:30
+     *
+     * JavaScript treats this as browser-local time.
+     * toISOString() converts it to UTC for Supabase.
+     */
+
     const newDate =
-      new Date(editDate);
+      new Date(
+        editDate
+      );
 
     if (
       Number.isNaN(
         newDate.getTime()
       )
     ) {
-
       setError(
-        "Please select a valid date and time."
+        "Please choose a valid date and time."
       );
 
       return;
@@ -812,33 +872,37 @@ function AdminContent() {
     );
 
     const {
+      data,
       error: updateError,
-    } = await supabase.rpc(
-      "update_salawat_entry",
-      {
-        p_project_code:
-          projectCode,
-
-        p_admin_pin:
-          adminPin,
-
-        p_entry_id:
-          editingEntry.id,
-
-        p_amount:
+    } = await supabase
+      .from(
+        "salawat_entries"
+      )
+      .update({
+        amount:
           numericAmount,
 
-        p_created_at:
+        created_at:
           newDate.toISOString(),
-      }
-    );
+      })
+      .eq(
+        "id",
+        editingEntry.id
+      )
+      .eq(
+        "project_id",
+        project.id
+      )
+      .select(
+        "id, participant_name, amount, created_at"
+      )
+      .single();
 
     setUpdatingEntry(
       false
     );
 
     if (updateError) {
-
       console.error(
         updateError
       );
@@ -851,22 +915,40 @@ function AdminContent() {
       return;
     }
 
+    if (!data) {
+      setError(
+        "The entry could not be updated."
+      );
+
+      return;
+    }
+
+    const updatedEntry: Entry = {
+      id:
+        Number(
+          data.id
+        ),
+
+      participant_name:
+        data.participant_name,
+
+      amount:
+        Number(
+          data.amount
+        ),
+
+      created_at:
+        data.created_at,
+    };
+
     setEntries(
       (previous) =>
         previous
           .map(
             (entry) =>
               entry.id ===
-              editingEntry.id
-                ? {
-                    ...entry,
-
-                    amount:
-                      numericAmount,
-
-                    created_at:
-                      newDate.toISOString(),
-                  }
+              updatedEntry.id
+                ? updatedEntry
                 : entry
           )
           .sort(
@@ -880,10 +962,6 @@ function AdminContent() {
           )
     );
 
-    setSuccess(
-      `Entry for ${editingEntry.participant_name} updated.`
-    );
-
     setEditingEntry(
       null
     );
@@ -894,6 +972,10 @@ function AdminContent() {
 
     setEditDate(
       ""
+    );
+
+    setSuccess(
+      `Entry for ${updatedEntry.participant_name} updated successfully.`
     );
 
     window.setTimeout(
@@ -907,7 +989,6 @@ function AdminContent() {
   async function deleteEntry(
     entryId: number
   ) {
-
     const confirmed =
       window.confirm(
         "Delete this Salawat entry? This cannot be undone."
@@ -945,7 +1026,6 @@ function AdminContent() {
     );
 
     if (deleteError) {
-
       console.error(
         deleteError
       );
@@ -980,13 +1060,8 @@ function AdminContent() {
   }
 
   function backToProject() {
-
     if (!projectCode) {
-
-      router.push(
-        "/"
-      );
-
+      router.push("/");
       return;
     }
 
@@ -1001,13 +1076,13 @@ function AdminContent() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f3e9] px-5">
 
         <div className="text-center">
 
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#174c3c]">
 
-            <span className="text-3xl text-white">
+            <span className="text-2xl text-white">
               ﷺ
             </span>
 
@@ -1025,17 +1100,9 @@ function AdminContent() {
 
   if (!project) {
     return (
-      <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f3e9] px-5">
 
         <div className="w-full max-w-md rounded-3xl border border-[#e5ded0] bg-white p-7 text-center shadow-sm">
-
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
-
-            <span className="text-3xl text-white">
-              ﷺ
-            </span>
-
-          </div>
 
           <h1 className="text-xl font-semibold text-gray-900">
             Project Not Found
@@ -1067,6 +1134,8 @@ function AdminContent() {
       <main className="min-h-screen bg-[#f7f3e9] px-4 py-4 sm:px-5">
 
         <div className="mx-auto w-full max-w-md">
+
+          {/* ADMIN LOGIN BANNER */}
 
           <div className="mb-5 rounded-3xl border border-[#cfded6] bg-[#eaf3ee] px-4 py-3 shadow-sm sm:px-5">
 
@@ -1119,6 +1188,8 @@ function AdminContent() {
 
           </div>
 
+          {/* PIN CARD */}
+
           <div className="rounded-3xl border border-[#e5ded0] bg-white p-7 shadow-sm">
 
             <label
@@ -1135,7 +1206,6 @@ function AdminContent() {
                 adminPin
               }
               onChange={(e) => {
-
                 setAdminPin(
                   e.target.value
                 );
@@ -1143,14 +1213,12 @@ function AdminContent() {
                 setError("");
               }}
               onKeyDown={(e) => {
-
                 if (
                   e.key ===
                   "Enter"
                 ) {
                   verifyPin();
                 }
-
               }}
               placeholder="Enter Admin PIN"
               autoFocus
@@ -1211,7 +1279,7 @@ function AdminContent() {
 
             <div className="text-right">
 
-              <p className="text-xs text-[#567365]">
+              <p className="text-[11px] text-[#567365]">
                 Project ID
               </p>
 
@@ -1245,15 +1313,18 @@ function AdminContent() {
 
         </div>
 
-        {/* MESSAGES */}
+        {/* GLOBAL ERROR */}
 
-        {error && (
+        {error &&
+          !editingEntry && (
 
-          <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
+            <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
 
-        )}
+          )}
+
+        {/* SUCCESS */}
 
         {success && (
 
@@ -1296,47 +1367,36 @@ function AdminContent() {
               Participant Name
             </label>
 
-            <div className="relative">
+            <input
+              id="participantSearch"
+              type="text"
+              autoComplete="off"
+              value={
+                participantSearch
+              }
+              onFocus={() =>
+                setShowParticipantSuggestions(
+                  true
+                )
+              }
+              onChange={(e) => {
+                setParticipantSearch(
+                  e.target.value
+                );
 
-              <input
-                id="participantSearch"
-                type="text"
-                autoComplete="off"
-                value={
-                  participantSearch
-                }
-                onFocus={() => {
+                setSelectedParticipant(
+                  ""
+                );
 
-                  setShowParticipantSuggestions(
-                    true
-                  );
+                setShowParticipantSuggestions(
+                  true
+                );
 
-                }}
-                onChange={(e) => {
-
-                  setParticipantSearch(
-                    e.target.value
-                  );
-
-                  setSelectedParticipant(
-                    ""
-                  );
-
-                  setShowParticipantSuggestions(
-                    true
-                  );
-
-                  setError("");
-                }}
-                placeholder="Start typing a participant's name..."
-                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pr-10 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
-              />
-
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                🔎
-              </div>
-
-            </div>
+                setError("");
+              }}
+              placeholder="Start typing a participant's name..."
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+            />
 
             {showParticipantSuggestions && (
 
@@ -1362,28 +1422,24 @@ function AdminContent() {
                         key={name}
                         type="button"
                         onMouseDown={(e) => {
-
                           e.preventDefault();
 
                           chooseParticipant(
                             name
                           );
-
                         }}
                         className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition hover:bg-[#eef6f2]"
                       >
 
-                        <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex items-center gap-3">
 
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eaf3ee] text-sm font-bold text-[#174c3c]">
-
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#eaf3ee] text-sm font-bold text-[#174c3c]">
                             {name
                               .charAt(0)
                               .toUpperCase()}
-
                           </div>
 
-                          <span className="truncate font-medium text-gray-800">
+                          <span className="font-medium text-gray-800">
                             {name}
                           </span>
 
@@ -1406,16 +1462,10 @@ function AdminContent() {
 
             {selectedParticipant && (
 
-              <div className="mt-2 flex items-center gap-2 text-xs font-medium text-[#174c3c]">
-
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#174c3c] text-[10px] text-white">
-                  ✓
-                </span>
-
-                Selected:{" "}
+              <p className="mt-2 text-xs font-medium text-[#174c3c]">
+                ✓ Selected:{" "}
                 {selectedParticipant}
-
-              </div>
+              </p>
 
             )}
 
@@ -1439,22 +1489,11 @@ function AdminContent() {
                 adminEntryAmount
               }
               onChange={(e) => {
-
                 setAdminEntryAmount(
                   e.target.value
                 );
 
                 setError("");
-              }}
-              onKeyDown={(e) => {
-
-                if (
-                  e.key ===
-                  "Enter"
-                ) {
-                  addParticipantEntry();
-                }
-
               }}
               placeholder="Enter amount"
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
@@ -1478,10 +1517,12 @@ function AdminContent() {
                   type="button"
                   onClick={() =>
                     setAdminEntryAmount(
-                      String(preset)
+                      String(
+                        preset
+                      )
                     )
                   }
-                  className="rounded-full border border-[#174c3c]/25 bg-[#f4f8f6] px-3 py-1.5 text-xs font-semibold text-[#174c3c] transition hover:bg-[#eaf3ee]"
+                  className="rounded-full border border-[#174c3c]/25 bg-[#f4f8f6] px-3 py-1.5 text-xs font-semibold text-[#174c3c]"
                 >
                   +{preset.toLocaleString()}
                 </button>
@@ -1499,7 +1540,7 @@ function AdminContent() {
             onClick={
               addParticipantEntry
             }
-            className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
+            className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white disabled:opacity-60"
           >
             {addingEntry
               ? "Adding Entry..."
@@ -1525,27 +1566,22 @@ function AdminContent() {
           <div className="mt-6">
 
             <label
-              htmlFor="projectName"
               className="mb-2 block text-sm font-medium text-gray-700"
             >
               Project Name
             </label>
 
             <input
-              id="projectName"
               type="text"
               value={
                 projectName
               }
-              onChange={(e) => {
-
+              onChange={(e) =>
                 setProjectName(
                   e.target.value
-                );
-
-                setError("");
-              }}
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+                )
+              }
+              className="w-full rounded-xl border border-gray-300 px-4 py-3"
             />
 
           </div>
@@ -1553,92 +1589,48 @@ function AdminContent() {
           <div className="mt-5">
 
             <label
-              htmlFor="overallGoal"
               className="mb-2 block text-sm font-medium text-gray-700"
             >
               Overall Project Goal
             </label>
 
             <input
-              id="overallGoal"
               type="number"
               min="1"
-              step="1"
               value={
                 goal
               }
-              onChange={(e) => {
-
+              onChange={(e) =>
                 setGoal(
                   e.target.value
-                );
-
-                setError("");
-              }}
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+                )
+              }
+              className="w-full rounded-xl border border-gray-300 px-4 py-3"
             />
-
-            <p className="mt-2 text-xs text-gray-500">
-              Example: 1,000,000 Salawat for the entire project.
-            </p>
 
           </div>
 
-          <div className="mt-5 rounded-2xl border border-[#d7e3dc] bg-[#f4f8f6] p-4">
+          <div className="mt-5">
 
-            <div className="mb-3">
-
-              <p className="text-sm font-semibold text-[#174c3c]">
-                Daily Salawat Goal
-              </p>
-
-              <p className="mt-1 text-xs text-gray-500">
-                This is the daily target shown to the community.
-              </p>
-
-            </div>
+            <label
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Daily Salawat Goal
+            </label>
 
             <input
-              id="dailyGoal"
               type="number"
               min="1"
-              step="1"
               value={
                 dailyGoal
               }
-              onChange={(e) => {
-
+              onChange={(e) =>
                 setDailyGoal(
                   e.target.value
-                );
-
-                setError("");
-              }}
-              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
-            />
-
-            <div className="mt-3 flex flex-wrap gap-2">
-
-              {[33, 100, 500, 1000].map(
-                (preset) => (
-
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() =>
-                      setDailyGoal(
-                        String(preset)
-                      )
-                    }
-                    className="rounded-full border border-[#174c3c]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
-                  >
-                    {preset.toLocaleString()}
-                  </button>
-
                 )
-              )}
-
-            </div>
+              }
+              className="w-full rounded-xl border border-gray-300 px-4 py-3"
+            />
 
           </div>
 
@@ -1683,7 +1675,7 @@ function AdminContent() {
             onClick={
               saveSettings
             }
-            className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white transition hover:bg-[#103d30] disabled:opacity-60"
+            className="mt-6 w-full rounded-xl bg-[#174c3c] py-3.5 font-semibold text-white disabled:opacity-60"
           >
             {saving
               ? "Saving..."
@@ -1706,7 +1698,8 @@ function AdminContent() {
 
           <div className="mt-5 space-y-3">
 
-            {entries.length === 0 ? (
+            {entries.length ===
+            0 ? (
 
               <div className="rounded-2xl bg-[#f7f3e9] p-5 text-center">
 
@@ -1718,34 +1711,33 @@ function AdminContent() {
 
             ) : (
 
-              entries.map((entry) => (
+              entries.map(
+                (entry) => (
 
-                <div
-                  key={
-                    entry.id
-                  }
-                  className="rounded-2xl bg-[#f7f3e9] px-4 py-3"
-                >
+                  <div
+                    key={
+                      entry.id
+                    }
+                    className="rounded-2xl bg-[#f7f3e9] p-4"
+                  >
 
-                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-start justify-between gap-3">
 
-                    <div className="min-w-0">
+                      <div className="min-w-0">
 
-                      <p className="truncate font-medium text-gray-900">
-                        {entry.participant_name}
-                      </p>
+                        <p className="truncate font-medium text-gray-900">
+                          {entry.participant_name}
+                        </p>
 
-                      <p className="mt-1 text-xs text-gray-500">
-                        {new Date(
-                          entry.created_at
-                        ).toLocaleString()}
-                      </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {new Date(
+                            entry.created_at
+                          ).toLocaleString()}
+                        </p>
 
-                    </div>
+                      </div>
 
-                    <div className="shrink-0 text-right">
-
-                      <p className="font-semibold text-[#174c3c]">
+                      <p className="shrink-0 font-semibold text-[#174c3c]">
                         +
                         {Number(
                           entry.amount
@@ -1754,46 +1746,45 @@ function AdminContent() {
 
                     </div>
 
-                  </div>
+                    <div className="mt-3 flex justify-end gap-2 border-t border-[#e5ded0] pt-3">
 
-                  <div className="mt-3 flex items-center justify-end gap-2 border-t border-[#e7e1d6] pt-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          startEditingEntry(
+                            entry
+                          )
+                        }
+                        className="rounded-lg border border-[#174c3c]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#174c3c]"
+                      >
+                        ✏️ Edit
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        startEditingEntry(
-                          entry
-                        )
-                      }
-                      className="rounded-lg border border-[#174c3c]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#174c3c] transition hover:bg-[#eef6f2]"
-                    >
-                      ✏️ Edit
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={
-                        deletingId ===
-                        entry.id
-                      }
-                      onClick={() =>
-                        deleteEntry(
+                      <button
+                        type="button"
+                        disabled={
+                          deletingId ===
                           entry.id
-                        )
-                      }
-                      className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                    >
-                      {deletingId ===
-                      entry.id
-                        ? "Deleting..."
-                        : "Delete"}
-                    </button>
+                        }
+                        onClick={() =>
+                          deleteEntry(
+                            entry.id
+                          )
+                        }
+                        className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 disabled:opacity-50"
+                      >
+                        {deletingId ===
+                        entry.id
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
+
+                    </div>
 
                   </div>
 
-                </div>
-
-              ))
+                )
+              )
 
             )}
 
@@ -1825,11 +1816,11 @@ function AdminContent() {
 
                 <button
                   type="button"
-                  onClick={
-                    cancelEditingEntry
-                  }
                   disabled={
                     updatingEntry
+                  }
+                  onClick={
+                    cancelEditingEntry
                   }
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f7f3e9] text-xl text-gray-600"
                 >
@@ -1856,7 +1847,6 @@ function AdminContent() {
                     editAmount
                   }
                   onChange={(e) => {
-
                     setEditAmount(
                       e.target.value
                     );
@@ -1884,7 +1874,6 @@ function AdminContent() {
                     editDate
                   }
                   onChange={(e) => {
-
                     setEditDate(
                       e.target.value
                     );
@@ -1895,20 +1884,28 @@ function AdminContent() {
                 />
 
                 <p className="mt-2 text-xs text-gray-500">
-                  Change this if the Salawat was entered for the wrong date.
+                  Choose the date and time when the Salawat was actually completed.
                 </p>
 
               </div>
+
+              {error && (
+
+                <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+
+              )}
 
               <div className="mt-6 grid grid-cols-2 gap-3">
 
                 <button
                   type="button"
-                  onClick={
-                    cancelEditingEntry
-                  }
                   disabled={
                     updatingEntry
+                  }
+                  onClick={
+                    cancelEditingEntry
                   }
                   className="rounded-xl border border-gray-300 py-3 font-semibold text-gray-700 disabled:opacity-50"
                 >
@@ -1917,11 +1914,11 @@ function AdminContent() {
 
                 <button
                   type="button"
-                  onClick={
-                    updateEntry
-                  }
                   disabled={
                     updatingEntry
+                  }
+                  onClick={
+                    updateEntry
                   }
                   className="rounded-xl bg-[#174c3c] py-3 font-semibold text-white disabled:opacity-60"
                 >
@@ -1948,23 +1945,11 @@ export default function AdminPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
+        <main className="flex min-h-screen items-center justify-center bg-[#f7f3e9] px-5">
 
-          <div className="text-center">
-
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
-
-              <span className="text-3xl text-white">
-                ﷺ
-              </span>
-
-            </div>
-
-            <p className="font-medium text-[#174c3c]">
-              Loading admin settings...
-            </p>
-
-          </div>
+          <p className="font-medium text-[#174c3c]">
+            Loading admin settings...
+          </p>
 
         </main>
       }
