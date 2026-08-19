@@ -867,11 +867,9 @@ function ProjectContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
-
         <p className="font-medium text-[#174c3c]">
           Loading Salawat project...
         </p>
-
       </main>
     );
   }
@@ -908,108 +906,110 @@ function ProjectContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3e9] px-4 py-5 sm:px-5">
+    <main className="min-h-screen bg-[#f7f3e9] px-4 py-4 sm:px-5">
 
       <div className="mx-auto w-full max-w-3xl">
 
         {/* COMPACT PROJECT HEADER */}
 
-        <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white/60 px-4 py-4 shadow-sm sm:px-5">
+        <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white/60 px-4 py-3 shadow-sm sm:px-5">
 
           {/* TOP ROW */}
 
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
 
             <button
               type="button"
               onClick={() =>
                 router.push("/")
               }
-              className="whitespace-nowrap text-sm font-medium text-[#174c3c]"
+              className="mt-1 whitespace-nowrap text-sm font-medium text-[#174c3c]"
             >
               ← Leave Project
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col items-end">
 
-              {project.show_participants && (
+              <div className="flex items-center gap-2">
+
+                {project.show_participants && (
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowScorecard(true)
+                    }
+                    className="rounded-full bg-[#174c3c] px-3 py-2 text-xs font-bold text-white shadow-md transition hover:bg-[#103d30] sm:px-4 sm:text-sm"
+                  >
+                    🏆 Scorecard
+                  </button>
+
+                )}
 
                 <button
                   type="button"
                   onClick={() =>
-                    setShowScorecard(true)
+                    router.push(
+                      `/admin?projectId=${encodeURIComponent(
+                        project.project_code
+                      )}&name=${encodeURIComponent(
+                        userName
+                      )}`
+                    )
                   }
-                  className="rounded-full bg-[#174c3c] px-3 py-2 text-xs font-bold text-white shadow-md transition hover:bg-[#103d30] sm:px-4 sm:text-sm"
+                  className="rounded-full border border-[#174c3c] px-3 py-2 text-xs font-semibold text-[#174c3c]"
                 >
-                  🏆 Scorecard
+                  Admin
                 </button>
 
-              )}
+              </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    `/admin?projectId=${encodeURIComponent(
-                      project.project_code
-                    )}&name=${encodeURIComponent(
-                      userName
-                    )}`
-                  )
-                }
-                className="rounded-full border border-[#174c3c] px-3 py-2 text-xs font-semibold text-[#174c3c]"
-              >
-                Admin
-              </button>
+              <p className="mt-1 pr-1 text-[11px] text-gray-500 sm:text-xs">
+
+                Project ID:{" "}
+
+                <span className="font-semibold text-[#174c3c]">
+                  {project.project_code}
+                </span>
+
+              </p>
 
             </div>
 
           </div>
 
-          {/* PROJECT INFO */}
+          {/* CENTER CONTENT */}
 
-          <div className="mt-4 flex flex-col items-center text-center">
+          <div className="-mt-6 flex flex-col items-center text-center sm:-mt-7">
 
             <p
               dir="rtl"
-              className="text-lg font-medium text-[#174c3c]"
+              className="text-base font-medium leading-none text-[#174c3c] sm:text-lg"
             >
               اللهم صل وسلم على نبينا محمد
             </p>
 
-            <div className="mt-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#174c3c]">
+            <div className="mt-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#174c3c]">
 
-              <span className="text-2xl text-white">
+              <span className="text-lg text-white">
                 ﷺ
               </span>
 
             </div>
 
-            <h1 className="mt-3 text-2xl font-bold leading-tight text-[#174c3c] sm:text-3xl">
+            <h1 className="mt-2 text-xl font-bold leading-tight text-[#174c3c] sm:text-2xl">
               {project.project_name}
             </h1>
 
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-gray-600">
 
-              <span>
-                Assalamu Alaikum,{" "}
-                <span className="font-medium text-gray-800">
-                  {userName}
-                </span>
+              Assalamu Alaikum,{" "}
+
+              <span className="font-medium text-gray-800">
+                {userName}
               </span>
 
-              <span className="hidden text-gray-300 sm:inline">
-                •
-              </span>
-
-              <span>
-                Project ID:{" "}
-                <span className="font-semibold text-[#174c3c]">
-                  {project.project_code}
-                </span>
-              </span>
-
-            </div>
+            </p>
 
           </div>
 
@@ -1046,8 +1046,6 @@ function ProjectContent() {
             </p>
 
           </div>
-
-          {/* DONUT */}
 
           <div className="relative mx-auto mt-4 h-72 w-72 max-w-full">
 
@@ -1144,8 +1142,6 @@ function ProjectContent() {
 
           </div>
 
-          {/* STATUS */}
-
           <div
             className={`mx-auto -mt-1 max-w-sm rounded-2xl px-5 py-4 text-center ${
               percentage >= 100
@@ -1173,8 +1169,6 @@ function ProjectContent() {
             </p>
 
           </div>
-
-          {/* NEXT MILESTONE */}
 
           {nextProjectMilestone ? (
 
@@ -1225,8 +1219,6 @@ function ProjectContent() {
             </div>
 
           )}
-
-          {/* MILESTONE TRACK */}
 
           <div className="mt-7">
 
@@ -1310,8 +1302,6 @@ function ProjectContent() {
             </div>
 
           </div>
-
-          {/* GOAL STATS */}
 
           <div className="mt-7 grid grid-cols-3 gap-2">
 
@@ -2228,7 +2218,7 @@ function ProjectContent() {
 
               )}
 
-              {/* EVERYONE'S PROGRESS */}
+              {/* EVERYONE */}
 
               <div className="mt-7">
 
@@ -2302,13 +2292,10 @@ function ProjectContent() {
                               <div className="min-w-0">
 
                                 <p className="truncate font-semibold text-gray-900">
-
                                   {participant.name}
-
                                   {isMe
                                     ? " (You)"
                                     : ""}
-
                                 </p>
 
                                 <p className="mt-1 text-xs text-gray-500">
