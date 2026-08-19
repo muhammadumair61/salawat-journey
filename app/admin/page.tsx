@@ -123,6 +123,8 @@ function AdminContent() {
   const [updatingEntry, setUpdatingEntry] =
     useState(false);
 
+  /* LOAD PROJECT */
+
   const loadProject = useCallback(async () => {
     if (!projectCode) {
       router.push("/");
@@ -168,34 +170,19 @@ function AdminContent() {
 
     const projectData: Project = {
       id: data.id,
-      project_code:
-        data.project_code,
-      project_name:
-        data.project_name,
-      goal:
-        Number(data.goal),
+      project_code: data.project_code,
+      project_name: data.project_name,
+      goal: Number(data.goal),
       daily_goal:
         Number(data.daily_goal) || 100,
       show_participants:
         data.show_participants ?? true,
     };
 
-    setProject(
-      projectData
-    );
-
-    setProjectName(
-      projectData.project_name
-    );
-
-    setGoal(
-      String(projectData.goal)
-    );
-
-    setDailyGoal(
-      String(projectData.daily_goal)
-    );
-
+    setProject(projectData);
+    setProjectName(projectData.project_name);
+    setGoal(String(projectData.goal));
+    setDailyGoal(String(projectData.daily_goal));
     setShowParticipants(
       projectData.show_participants
     );
@@ -206,8 +193,12 @@ function AdminContent() {
     router,
   ]);
 
+  /* LOAD RECENT ENTRIES */
+
   const loadEntries = useCallback(
-    async (projectId: string) => {
+    async (
+      projectId: string
+    ) => {
       const {
         data,
         error: entryError,
@@ -263,6 +254,8 @@ function AdminContent() {
     },
     []
   );
+
+  /* LOAD PARTICIPANT NAMES */
 
   const loadParticipantNames =
     useCallback(
@@ -340,6 +333,8 @@ function AdminContent() {
     loadProject,
   ]);
 
+  /* AUTOCOMPLETE */
+
   const filteredParticipantNames =
     useMemo(() => {
       const search =
@@ -369,6 +364,8 @@ function AdminContent() {
       participantNames,
       participantSearch,
     ]);
+
+  /* VERIFY ADMIN */
 
   async function verifyPin() {
     setError("");
@@ -420,7 +417,9 @@ function AdminContent() {
       return;
     }
 
-    setVerified(true);
+    setVerified(
+      true
+    );
 
     if (project) {
       await Promise.all([
@@ -434,6 +433,8 @@ function AdminContent() {
       ]);
     }
   }
+
+  /* SAVE PROJECT SETTINGS */
 
   async function saveSettings() {
     setError("");
@@ -485,7 +486,9 @@ function AdminContent() {
       return;
     }
 
-    setSaving(true);
+    setSaving(
+      true
+    );
 
     const {
       error: updateError,
@@ -512,7 +515,9 @@ function AdminContent() {
       }
     );
 
-    setSaving(false);
+    setSaving(
+      false
+    );
 
     if (updateError) {
       console.error(
@@ -541,6 +546,8 @@ function AdminContent() {
     );
   }
 
+  /* SELECT PARTICIPANT */
+
   function chooseParticipant(
     name: string
   ) {
@@ -558,6 +565,8 @@ function AdminContent() {
 
     setError("");
   }
+
+  /* ADD ENTRY FOR PARTICIPANT */
 
   async function addParticipantEntry() {
     if (!project) {
@@ -622,7 +631,6 @@ function AdminContent() {
     );
 
     const {
-      data,
       error: insertError,
     } = await supabase
       .from(
@@ -636,11 +644,7 @@ function AdminContent() {
           matchingParticipant,
 
         amount,
-      })
-      .select(
-        "id, participant_name, amount, created_at"
-      )
-      .single();
+      });
 
     setAddingEntry(
       false
@@ -659,28 +663,12 @@ function AdminContent() {
       return;
     }
 
-    const newEntry: Entry = {
-      id:
-        Number(data.id),
+    await loadEntries(
+      project.id
+    );
 
-      participant_name:
-        data.participant_name,
-
-      amount:
-        Number(data.amount),
-
-      created_at:
-        data.created_at,
-    };
-
-    setEntries(
-      (previous) => [
-        newEntry,
-        ...previous,
-      ].slice(
-        0,
-        50
-      )
+    await loadParticipantNames(
+      project.id
     );
 
     setParticipantSearch(
@@ -711,10 +699,7 @@ function AdminContent() {
     );
   }
 
-  /*
-   * Converts the database timestamp
-   * to browser-local datetime format.
-   */
+  /* FORMAT DATE FOR DATETIME-LOCAL */
 
   function formatDateForInput(
     dateString: string
@@ -762,6 +747,8 @@ function AdminContent() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
+  /* OPEN EDIT WINDOW */
+
   function startEditingEntry(
     entry: Entry
   ) {
@@ -785,6 +772,8 @@ function AdminContent() {
     setSuccess("");
   }
 
+  /* CLOSE EDIT WINDOW */
+
   function cancelEditingEntry() {
     setEditingEntry(
       null
@@ -801,9 +790,7 @@ function AdminContent() {
     setError("");
   }
 
-  /*
-   * UPDATE ENTRY DIRECTLY
-   */
+  /* UPDATE ENTRY */
 
   async function updateEntry() {
     if (
@@ -836,19 +823,11 @@ function AdminContent() {
 
     if (!editDate) {
       setError(
-        "Please choose a valid date and time."
+        "Please select a valid date and time."
       );
 
       return;
     }
-
-    /*
-     * datetime-local gives a value like:
-     * 2026-08-19T15:30
-     *
-     * JavaScript treats this as browser-local time.
-     * toISOString() converts it to UTC for Supabase.
-     */
 
     const newDate =
       new Date(
@@ -861,7 +840,7 @@ function AdminContent() {
       )
     ) {
       setError(
-        "Please choose a valid date and time."
+        "Please select a valid date and time."
       );
 
       return;
@@ -872,7 +851,6 @@ function AdminContent() {
     );
 
     const {
-      data,
       error: updateError,
     } = await supabase
       .from(
@@ -892,11 +870,7 @@ function AdminContent() {
       .eq(
         "project_id",
         project.id
-      )
-      .select(
-        "id, participant_name, amount, created_at"
-      )
-      .single();
+      );
 
     setUpdatingEntry(
       false
@@ -915,51 +889,8 @@ function AdminContent() {
       return;
     }
 
-    if (!data) {
-      setError(
-        "The entry could not be updated."
-      );
-
-      return;
-    }
-
-    const updatedEntry: Entry = {
-      id:
-        Number(
-          data.id
-        ),
-
-      participant_name:
-        data.participant_name,
-
-      amount:
-        Number(
-          data.amount
-        ),
-
-      created_at:
-        data.created_at,
-    };
-
-    setEntries(
-      (previous) =>
-        previous
-          .map(
-            (entry) =>
-              entry.id ===
-              updatedEntry.id
-                ? updatedEntry
-                : entry
-          )
-          .sort(
-            (a, b) =>
-              new Date(
-                b.created_at
-              ).getTime() -
-              new Date(
-                a.created_at
-              ).getTime()
-          )
+    await loadEntries(
+      project.id
     );
 
     setEditingEntry(
@@ -975,7 +906,7 @@ function AdminContent() {
     );
 
     setSuccess(
-      `Entry for ${updatedEntry.participant_name} updated successfully.`
+      "Entry updated successfully."
     );
 
     window.setTimeout(
@@ -986,9 +917,21 @@ function AdminContent() {
     );
   }
 
+  /* DELETE ENTRY */
+
   async function deleteEntry(
     entryId: number
   ) {
+    /*
+     * IMPORTANT:
+     * This fixes TS18047:
+     * 'project' is possibly null.
+     */
+
+    if (!project) {
+      return;
+    }
+
     const confirmed =
       window.confirm(
         "Delete this Salawat entry? This cannot be undone."
@@ -1038,13 +981,8 @@ function AdminContent() {
       return;
     }
 
-    setEntries(
-      (previous) =>
-        previous.filter(
-          (entry) =>
-            entry.id !==
-            entryId
-        )
+    await loadEntries(
+      project.id
     );
 
     setSuccess(
@@ -1058,6 +996,8 @@ function AdminContent() {
       3000
     );
   }
+
+  /* BACK */
 
   function backToProject() {
     if (!projectCode) {
@@ -1073,6 +1013,8 @@ function AdminContent() {
       )}`
     );
   }
+
+  /* LOADING */
 
   if (loading) {
     return (
@@ -1097,6 +1039,8 @@ function AdminContent() {
       </main>
     );
   }
+
+  /* PROJECT NOT FOUND */
 
   if (!project) {
     return (
@@ -1129,13 +1073,13 @@ function AdminContent() {
     );
   }
 
+  /* ADMIN LOGIN */
+
   if (!verified) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] px-4 py-4 sm:px-5">
 
         <div className="mx-auto w-full max-w-md">
-
-          {/* ADMIN LOGIN BANNER */}
 
           <div className="mb-5 rounded-3xl border border-[#cfded6] bg-[#eaf3ee] px-4 py-3 shadow-sm sm:px-5">
 
@@ -1187,8 +1131,6 @@ function AdminContent() {
             </div>
 
           </div>
-
-          {/* PIN CARD */}
 
           <div className="rounded-3xl border border-[#e5ded0] bg-white p-7 shadow-sm">
 
@@ -1306,14 +1248,15 @@ function AdminContent() {
             </h1>
 
             <p className="mt-1 text-sm text-[#50665b]">
-              Manage {project.project_name}
+              Manage{" "}
+              {project.project_name}
             </p>
 
           </div>
 
         </div>
 
-        {/* GLOBAL ERROR */}
+        {/* ERROR */}
 
         {error &&
           !editingEntry && (
@@ -1419,7 +1362,9 @@ function AdminContent() {
                     (name) => (
 
                       <button
-                        key={name}
+                        key={
+                          name
+                        }
                         type="button"
                         onMouseDown={(e) => {
                           e.preventDefault();
@@ -1434,9 +1379,13 @@ function AdminContent() {
                         <div className="flex items-center gap-3">
 
                           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#eaf3ee] text-sm font-bold text-[#174c3c]">
+
                             {name
-                              .charAt(0)
+                              .charAt(
+                                0
+                              )
                               .toUpperCase()}
+
                           </div>
 
                           <span className="font-medium text-gray-800">
@@ -1513,7 +1462,9 @@ function AdminContent() {
               (preset) => (
 
                 <button
-                  key={preset}
+                  key={
+                    preset
+                  }
                   type="button"
                   onClick={() =>
                     setAdminEntryAmount(
@@ -1524,7 +1475,8 @@ function AdminContent() {
                   }
                   className="rounded-full border border-[#174c3c]/25 bg-[#f4f8f6] px-3 py-1.5 text-xs font-semibold text-[#174c3c]"
                 >
-                  +{preset.toLocaleString()}
+                  +
+                  {preset.toLocaleString()}
                 </button>
 
               )
@@ -1565,9 +1517,7 @@ function AdminContent() {
 
           <div className="mt-6">
 
-            <label
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
+            <label className="mb-2 block text-sm font-medium text-gray-700">
               Project Name
             </label>
 
@@ -1576,11 +1526,13 @@ function AdminContent() {
               value={
                 projectName
               }
-              onChange={(e) =>
+              onChange={(e) => {
                 setProjectName(
                   e.target.value
-                )
-              }
+                );
+
+                setError("");
+              }}
               className="w-full rounded-xl border border-gray-300 px-4 py-3"
             />
 
@@ -1588,9 +1540,7 @@ function AdminContent() {
 
           <div className="mt-5">
 
-            <label
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
+            <label className="mb-2 block text-sm font-medium text-gray-700">
               Overall Project Goal
             </label>
 
@@ -1600,11 +1550,13 @@ function AdminContent() {
               value={
                 goal
               }
-              onChange={(e) =>
+              onChange={(e) => {
                 setGoal(
                   e.target.value
-                )
-              }
+                );
+
+                setError("");
+              }}
               className="w-full rounded-xl border border-gray-300 px-4 py-3"
             />
 
@@ -1612,9 +1564,7 @@ function AdminContent() {
 
           <div className="mt-5">
 
-            <label
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
+            <label className="mb-2 block text-sm font-medium text-gray-700">
               Daily Salawat Goal
             </label>
 
@@ -1624,11 +1574,13 @@ function AdminContent() {
               value={
                 dailyGoal
               }
-              onChange={(e) =>
+              onChange={(e) => {
                 setDailyGoal(
                   e.target.value
-                )
-              }
+                );
+
+                setError("");
+              }}
               className="w-full rounded-xl border border-gray-300 px-4 py-3"
             />
 
@@ -1945,7 +1897,7 @@ export default function AdminPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-[#f7f3e9] px-5">
+        <main className="flex min-h-screen items-center justify-center bg-[#f7f3e9]">
 
           <p className="font-medium text-[#174c3c]">
             Loading admin settings...
