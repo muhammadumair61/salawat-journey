@@ -100,34 +100,67 @@ export default function CreateProjectPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3e9] px-5 py-10">
-      <div className="mx-auto w-full max-w-md">
-        <button
-          type="button"
-          onClick={() => router.push("/")}
-          className="mb-6 text-sm font-medium text-[#174c3c]"
-        >
-          ← Back
-        </button>
+    <main className="min-h-screen bg-[#f7f3e9] px-4 py-4 sm:px-5">
 
-        <div className="mb-7 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
-            <span className="text-3xl text-white">
-              ﷺ
-            </span>
+      <div className="mx-auto w-full max-w-md">
+
+        {/* SAGE HEADER BANNER */}
+
+        <div className="mb-5 rounded-3xl border border-[#cfded6] bg-[#eaf3ee] px-4 py-3 shadow-sm sm:px-5">
+
+          {/* BACK BUTTON */}
+
+          <div className="flex items-center justify-start">
+
+            <button
+              type="button"
+              onClick={() => router.push("/")}
+              className="text-sm font-medium text-[#174c3c]"
+            >
+              ← Back
+            </button>
+
           </div>
 
-          <h1 className="text-3xl font-bold text-[#174c3c]">
-            Create Project
-          </h1>
+          {/* CENTER CONTENT */}
 
-          <p className="mt-2 text-gray-600">
-            Start a new Salawat journey.
-          </p>
+          <div className="-mt-2 flex flex-col items-center text-center">
+
+            <p
+              dir="rtl"
+              className="text-base font-medium leading-none text-[#174c3c] sm:text-lg"
+            >
+              اللهم صل وسلم على نبينا محمد
+            </p>
+
+            <div className="mt-2 flex h-10 w-10 items-center justify-center rounded-full bg-[#174c3c] shadow-sm">
+
+              <span className="text-lg text-white">
+                ﷺ
+              </span>
+
+            </div>
+
+            <h1 className="mt-2 text-2xl font-bold leading-tight text-[#174c3c]">
+              Create Project
+            </h1>
+
+            <p className="mt-1 text-sm text-[#50665b]">
+              Start a new Salawat journey.
+            </p>
+
+          </div>
+
         </div>
 
+        {/* CREATE PROJECT FORM */}
+
         <div className="rounded-3xl border border-[#e5ded0] bg-white p-6 shadow-lg sm:p-8">
+
+          {/* PROJECT NAME */}
+
           <div className="mb-5">
+
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Project Name
             </label>
@@ -139,11 +172,15 @@ export default function CreateProjectPage() {
                 setError("");
               }}
               placeholder="Enter Project Name Here"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
+
           </div>
 
+          {/* PROJECT ID */}
+
           <div className="mb-5">
+
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Project ID
             </label>
@@ -160,15 +197,19 @@ export default function CreateProjectPage() {
                 setError("");
               }}
               placeholder="Enter Project ID Here"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
 
             <p className="mt-2 text-xs text-gray-500">
               Participants will use this ID to join your project.
             </p>
+
           </div>
 
+          {/* SALAWAT GOAL */}
+
           <div className="mb-5">
+
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Salawat Goal
             </label>
@@ -182,11 +223,15 @@ export default function CreateProjectPage() {
                 setError("");
               }}
               placeholder="1000000"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
+
           </div>
 
+          {/* ADMIN NAME */}
+
           <div className="mb-5">
+
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Your Name
             </label>
@@ -198,11 +243,15 @@ export default function CreateProjectPage() {
                 setError("");
               }}
               placeholder="Enter Your Name Here"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
+
           </div>
 
+          {/* ADMIN PIN */}
+
           <div className="mb-6">
+
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Admin PIN
             </label>
@@ -215,19 +264,26 @@ export default function CreateProjectPage() {
                 setError("");
               }}
               placeholder="At least 4 digits"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#174c3c] focus:ring-2 focus:ring-[#174c3c]/20"
             />
 
             <p className="mt-2 text-xs text-gray-500">
               Keep this PIN safe. It will be used for project management.
             </p>
+
           </div>
 
+          {/* ERROR */}
+
           {error && (
+
             <div className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
+
           )}
+
+          {/* CREATE BUTTON */}
 
           <button
             type="button"
@@ -239,8 +295,11 @@ export default function CreateProjectPage() {
               ? "Creating Project..."
               : "Create Project"}
           </button>
+
         </div>
+
       </div>
+
     </main>
   );
 }
