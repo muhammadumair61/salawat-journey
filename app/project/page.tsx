@@ -463,6 +463,13 @@ function ProjectContent() {
         const cleanName =
           entry.participant_name.trim();
 
+        if (
+          cleanName.toLowerCase() ===
+          "2024 historical total"
+        ) {
+          return;
+        }
+
         const key =
           cleanName.toLowerCase();
 
@@ -512,7 +519,7 @@ function ProjectContent() {
   const scorecardChartData =
     useMemo(() => {
       return participantTotals
-        .slice(0, 10)
+        .slice(0, 8)
         .map((participant) => ({
           name: participant.name,
           total: participant.total,
@@ -860,9 +867,11 @@ function ProjectContent() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#f7f3e9] flex items-center justify-center px-5">
+
         <p className="font-medium text-[#174c3c]">
           Loading Salawat project...
         </p>
+
       </main>
     );
   }
@@ -899,96 +908,110 @@ function ProjectContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f3e9] px-4 py-8 sm:px-5">
+    <main className="min-h-screen bg-[#f7f3e9] px-4 py-5 sm:px-5">
 
       <div className="mx-auto w-full max-w-3xl">
 
-        {/* SALAWAT */}
+        {/* COMPACT PROJECT HEADER */}
 
-        <p
-          dir="rtl"
-          className="mb-6 text-center text-2xl font-medium text-[#174c3c]"
-        >
-          اللهم صل وسلم على نبينا محمد
-        </p>
+        <div className="mb-5 rounded-3xl border border-[#e5ded0] bg-white/60 px-4 py-4 shadow-sm sm:px-5">
 
-        {/* TOP NAV */}
+          {/* TOP ROW */}
 
-        <div className="mb-6 flex items-center justify-between gap-3">
-
-          <button
-            type="button"
-            onClick={() =>
-              router.push("/")
-            }
-            className="text-sm font-medium text-[#174c3c]"
-          >
-            ← Leave Project
-          </button>
-
-          <div className="flex items-center gap-2">
-
-            {project.show_participants && (
-
-              <button
-                type="button"
-                onClick={() =>
-                  setShowScorecard(true)
-                }
-                className="rounded-full bg-[#174c3c] px-4 py-2 text-sm font-bold text-white shadow-md transition hover:bg-[#103d30] hover:shadow-lg"
-              >
-                🏆 Scorecard
-              </button>
-
-            )}
+          <div className="flex items-center justify-between gap-3">
 
             <button
               type="button"
               onClick={() =>
-                router.push(
-                  `/admin?projectId=${encodeURIComponent(
-                    project.project_code
-                  )}&name=${encodeURIComponent(
-                    userName
-                  )}`
-                )
+                router.push("/")
               }
-              className="rounded-full border border-[#174c3c] px-3 py-1.5 text-xs font-semibold text-[#174c3c]"
+              className="whitespace-nowrap text-sm font-medium text-[#174c3c]"
             >
-              Admin
+              ← Leave Project
             </button>
 
+            <div className="flex items-center gap-2">
+
+              {project.show_participants && (
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowScorecard(true)
+                  }
+                  className="rounded-full bg-[#174c3c] px-3 py-2 text-xs font-bold text-white shadow-md transition hover:bg-[#103d30] sm:px-4 sm:text-sm"
+                >
+                  🏆 Scorecard
+                </button>
+
+              )}
+
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    `/admin?projectId=${encodeURIComponent(
+                      project.project_code
+                    )}&name=${encodeURIComponent(
+                      userName
+                    )}`
+                  )
+                }
+                className="rounded-full border border-[#174c3c] px-3 py-2 text-xs font-semibold text-[#174c3c]"
+              >
+                Admin
+              </button>
+
+            </div>
+
           </div>
 
-        </div>
+          {/* PROJECT INFO */}
 
-        {/* HEADER */}
+          <div className="mt-4 flex flex-col items-center text-center">
 
-        <div className="mb-7 text-center">
+            <p
+              dir="rtl"
+              className="text-lg font-medium text-[#174c3c]"
+            >
+              اللهم صل وسلم على نبينا محمد
+            </p>
 
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#174c3c]">
+            <div className="mt-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#174c3c]">
 
-            <span className="text-3xl text-white">
-              ﷺ
-            </span>
+              <span className="text-2xl text-white">
+                ﷺ
+              </span>
+
+            </div>
+
+            <h1 className="mt-3 text-2xl font-bold leading-tight text-[#174c3c] sm:text-3xl">
+              {project.project_name}
+            </h1>
+
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-gray-600">
+
+              <span>
+                Assalamu Alaikum,{" "}
+                <span className="font-medium text-gray-800">
+                  {userName}
+                </span>
+              </span>
+
+              <span className="hidden text-gray-300 sm:inline">
+                •
+              </span>
+
+              <span>
+                Project ID:{" "}
+                <span className="font-semibold text-[#174c3c]">
+                  {project.project_code}
+                </span>
+              </span>
+
+            </div>
 
           </div>
-
-          <h1 className="text-3xl font-bold text-[#174c3c]">
-            {project.project_name}
-          </h1>
-
-          <p className="mt-3 text-gray-600">
-            Assalamu Alaikum,{" "}
-            {userName}
-          </p>
-
-          <p className="mt-2 text-sm text-gray-500">
-            Project ID:{" "}
-            <span className="font-semibold text-[#174c3c]">
-              {project.project_code}
-            </span>
-          </p>
 
         </div>
 
@@ -1078,8 +1101,6 @@ function ProjectContent() {
               </PieChart>
 
             </ResponsiveContainer>
-
-            {/* CENTER */}
 
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
 
@@ -1991,7 +2012,7 @@ function ProjectContent() {
 
               </div>
 
-              {/* PODIUM */}
+              {/* TOP CONTRIBUTORS */}
 
               {participantTotals.length >
                 0 && (
@@ -2094,7 +2115,7 @@ function ProjectContent() {
                     Top contributors by total Salawat
                   </p>
 
-                  <div className="mt-5 h-72">
+                  <div className="mt-5 h-80">
 
                     <ResponsiveContainer
                       width="100%"
@@ -2105,17 +2126,19 @@ function ProjectContent() {
                         data={
                           scorecardChartData
                         }
+                        barCategoryGap="32%"
                         margin={{
-                          top: 15,
-                          right: 10,
-                          left: 0,
-                          bottom: 25,
+                          top: 20,
+                          right: 15,
+                          left: 10,
+                          bottom: 45,
                         }}
                       >
 
                         <CartesianGrid
                           strokeDasharray="3 3"
                           vertical={false}
+                          stroke="#e5e7eb"
                         />
 
                         <XAxis
@@ -2123,18 +2146,53 @@ function ProjectContent() {
                           tickLine={false}
                           axisLine={false}
                           interval={0}
-                          angle={-25}
+                          angle={-22}
                           textAnchor="end"
-                          height={65}
+                          height={80}
                           tick={{
                             fontSize: 11,
+                            fill: "#5f6368",
                           }}
                         />
 
                         <YAxis
                           tickLine={false}
                           axisLine={false}
-                          width={55}
+                          width={65}
+                          tick={{
+                            fontSize: 11,
+                            fill: "#6b7280",
+                          }}
+                          tickFormatter={(
+                            value
+                          ) => {
+                            const number =
+                              Number(value);
+
+                            if (
+                              number >=
+                              1000000
+                            ) {
+                              return `${(
+                                number /
+                                1000000
+                              ).toFixed(
+                                1
+                              )}M`;
+                            }
+
+                            if (
+                              number >=
+                              1000
+                            ) {
+                              return `${Math.round(
+                                number /
+                                  1000
+                              )}K`;
+                            }
+
+                            return number.toLocaleString();
+                          }}
                         />
 
                         <Tooltip
@@ -2152,12 +2210,12 @@ function ProjectContent() {
                           dataKey="total"
                           fill="#174c3c"
                           radius={[
-                            8,
-                            8,
+                            7,
+                            7,
                             0,
                             0,
                           ]}
-                          maxBarSize={55}
+                          maxBarSize={34}
                         />
 
                       </BarChart>
@@ -2170,7 +2228,7 @@ function ProjectContent() {
 
               )}
 
-              {/* EVERYONE */}
+              {/* EVERYONE'S PROGRESS */}
 
               <div className="mt-7">
 
@@ -2244,10 +2302,13 @@ function ProjectContent() {
                               <div className="min-w-0">
 
                                 <p className="truncate font-semibold text-gray-900">
+
                                   {participant.name}
+
                                   {isMe
                                     ? " (You)"
                                     : ""}
+
                                 </p>
 
                                 <p className="mt-1 text-xs text-gray-500">
