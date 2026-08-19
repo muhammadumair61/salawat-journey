@@ -853,7 +853,7 @@ function AdminContent() {
     const {
       error: updateError,
     } = await supabase.rpc(
-      "update_salawat_entry",
+      "admin_update_salawat_entry",
       {
         p_project_code:
           projectCode,
