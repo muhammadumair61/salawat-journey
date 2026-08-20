@@ -18,6 +18,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Line,
   LineChart,
   Pie,
@@ -55,7 +56,7 @@ type ParticipantTotal = {
 };
 
 type ChartDay = {
-  day: string;
+  date: string;
   total: number;
 };
 
@@ -581,11 +582,12 @@ function ProjectContent() {
             );
 
         days.push({
-          day:
+          date:
             date.toLocaleDateString(
               "en-US",
               {
-                weekday: "short",
+                month: "numeric",
+                day: "numeric",
               }
             ),
           total: dayTotal,
@@ -1662,6 +1664,12 @@ function ProjectContent() {
 
                 <BarChart
                   data={chartData}
+                  margin={{
+                    top: 30,
+                    right: 10,
+                    left: 0,
+                    bottom: 0,
+                  }}
                 >
 
                   <CartesianGrid
@@ -1670,7 +1678,7 @@ function ProjectContent() {
                   />
 
                   <XAxis
-                    dataKey="day"
+                    dataKey="date"
                     tickLine={false}
                     axisLine={false}
                   />
@@ -1699,7 +1707,21 @@ function ProjectContent() {
                       0,
                       0,
                     ]}
-                  />
+                  >
+                    <LabelList
+                      dataKey="total"
+                      position="top"
+                      offset={8}
+                      formatter={(value) =>
+                        Number(value ?? 0).toLocaleString()
+                      }
+                      style={{
+                        fill: "#174c3c",
+                        fontSize: 12,
+                        fontWeight: 600,
+                      }}
+                    />
+                  </Bar>
 
                 </BarChart>
 
